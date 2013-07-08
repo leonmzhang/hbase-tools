@@ -8,12 +8,17 @@
     <groupId>com.iflytek.hbase</groupId>
     <artifactId>hbase-tools</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>HBase Tools</name>
   </parent>
 
   <groupId>com.iflytek.hbase</groupId>
-  <artifactId>hbase-tools-cdh3</artifactId>
+  <artifactId>hbase-tools-cdh4</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+    </dependency>
+  </dependencies>
 
 </project>
