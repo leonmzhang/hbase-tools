@@ -7,3 +7,16 @@ if [ $# = 0 ]; then
   echo "    get     get"
   echo "    put     put"
 fi
+
+CLASSPATH=${CLASSPATH}:
+JAVA=${JAVA_HOME}/bin/java
+
+COMMAND=$1
+shift
+
+if [ ${COMMAND} = "scan" ]; then
+  CLASS="com.iflytek.hbase.ScanTool"
+fi
+
+${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS}
+
