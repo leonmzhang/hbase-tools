@@ -48,6 +48,7 @@ public class ScanTool {
     Common.globalInit();
     
     Configuration conf = new Configuration();
+    conf.addResource("hbase-tools.xml");
     
     ScanTool st = new ScanTool(conf, args);
     st.runTool();

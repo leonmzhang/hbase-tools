@@ -13,7 +13,7 @@ if [ $# = 0 ]; then
   exit 1
 fi
 
-CLASSPATH=${CLASSPATH}:${bin}/../hbase-tools-cdh4-0.1.0-SNAPSHOT-jar-with-dependencies.jar
+CLASSPATH=${CLASSPATH}:${bin}/../hbase-tools-cdh4-0.1.0-SNAPSHOT-jar-with-dependencies.jar:${bin}/../conf
 JAVA=${JAVA_HOME}/bin/java
 
 COMMAND=$1

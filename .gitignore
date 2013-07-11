@@ -3,3 +3,4 @@ hbase-cdh3/target
 .classpath
 .project
 *.jar
+.settings
