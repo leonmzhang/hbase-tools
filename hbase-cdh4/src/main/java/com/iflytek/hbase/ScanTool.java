@@ -4,8 +4,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.util.Bytes;
 
 public class ScanTool {
   
@@ -22,10 +24,18 @@ public class ScanTool {
   
   public void runTool() throws Exception {
     HTable table = new HTable(conf, "personal");
+    int scanCount = 10; 
+    if(cmdLine.hasOption('n')) {
+      scanCount = Integer.parseInt(cmdLine.getOptionValue('n'));
+    }
     
     Scan scan = new Scan();
     
     ResultScanner scanner = table.getScanner(scan);
+    Result result = null;
+    while(scanCount-- > 0 && (result = scanner.next()) != null) {
+      System.out.println(Bytes.toString(result.getRow()));
+    } 
     
     scanner.close();
     table.close();
