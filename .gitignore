@@ -2,3 +2,4 @@ hbase-cdh4/target
 hbase-cdh3/target
 .classpath
 .project
+*.jar
