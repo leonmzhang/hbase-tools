@@ -47,8 +47,13 @@ class CellGet {
     sb.append(LINE_SEPARATOR);
     sb.append("where command is one of:");
     sb.append(LINE_SEPARATOR);
-    sb.append(TAB);
-    sb.append("scan");
+    sb.append("    scan");
+    sb.append(LINE_SEPARATOR);
+    sb.append("    put");
+    sb.append(LINE_SEPARATOR);
+    sb.append("    get");
+    sb.append(LINE_SEPARATOR);
+    
     System.out.println(sb.toString());
   }
   
@@ -59,7 +64,6 @@ class CellGet {
       System.exit(1);
     }
     LOG.info("tool start!");
-    
     
     System.out.println("");
     
