@@ -1,7 +1,6 @@
 package com.iflytek.hbase;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
 import org.apache.commons.cli.CommandLine;
@@ -29,13 +28,13 @@ public class ScanTool {
   
   public void runTool() throws Exception {
     HTable table = new HTable(conf, "personal");
-    int scanCount = 10; 
+    int scanCount = 10;
     String outputFileName = "output";
-    if(cmdLine.hasOption('n')) {
+    if (cmdLine.hasOption('n')) {
       scanCount = Integer.parseInt(cmdLine.getOptionValue('n'));
     }
     
-    if(cmdLine.hasOption('o')) {
+    if (cmdLine.hasOption('o')) {
       outputFileName = cmdLine.getOptionValue('o');
     }
     
@@ -43,13 +42,17 @@ public class ScanTool {
     
     ResultScanner scanner = table.getScanner(scan);
     Result result = null;
+    
+    StringBuilder sb = new StringBuilder();
+    
+    while (scanCount-- > 0 && (result = scanner.next()) != null) {
+      sb.append(Bytes.toString(result.getRow()));
+      sb.append(Constants.LINE_SEPARATOR);
+    }
+    
     File output = new File(outputFileName);
     PrintWriter pw = new PrintWriter(output);
-    
-    while(scanCount-- > 0 && (result = scanner.next()) != null) {
-      pw.write(Bytes.toString(result.getRow()));
-    } 
-
+    pw.write(sb.toString());
     pw.close();
     scanner.close();
     table.close();
