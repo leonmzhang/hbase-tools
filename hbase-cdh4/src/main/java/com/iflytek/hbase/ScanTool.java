@@ -2,6 +2,11 @@ package com.iflytek.hbase;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NavigableMap;
+
+import javax.swing.text.TabableView;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -19,15 +24,25 @@ public class ScanTool {
   
   private Configuration conf;
   
-  public ScanTool(Configuration conf, String[] args) throws Exception {
+  public ScanTool() throws Exception {
     options.addOption("n", "scan-number", true, "Number of scan count!");
     options.addOption("o", "output", true, "Output file");
     options.addOption("s", "start-row", true, "Start row");
-    cmdLine = Common.parseOptions(options, args);
-    this.conf = new Configuration(conf);
+    options.addOption("h", "help", false, "help");
   }
   
-  public void runTool() throws Exception {
+  private void usage() {
+    
+  }
+  
+  public void runTool(Configuration conf, String[] args) throws Exception {
+    cmdLine = Common.parseOptions(options, args);
+    this.conf = new Configuration(conf);
+    if (cmdLine.hasOption('h')) {
+      usage();
+      return;
+    }
+    
     HTable table = new HTable(conf, "personal");
     int scanCount = 10;
     String outputFileName = "output";
@@ -40,7 +55,7 @@ public class ScanTool {
     }
     
     Scan scan = new Scan();
-    if(cmdLine.hasOption('s')) {
+    if (cmdLine.hasOption('s')) {
       scan.setStartRow(Bytes.toBytes(cmdLine.getOptionValue('s')));
     }
     
@@ -48,10 +63,34 @@ public class ScanTool {
     Result result = null;
     
     StringBuilder sb = new StringBuilder();
+    String row = null;
+    String column = null;
+    String faimly = null;
+    String qualify = null;
+    
+    int valueLength = 0;
+    NavigableMap<byte[],NavigableMap<byte[],byte[]>> noVersionMap = null;
+    NavigableMap<?,?> familyMap = null;
     
     while (scanCount-- > 0 && (result = scanner.next()) != null) {
-      sb.append(Bytes.toString(result.getRow()));
+      row = Bytes.toString(result.getRow());
+      sb.append(row);
       sb.append(Constants.LINE_SEPARATOR);
+      
+      noVersionMap = result.getNoVersionMap();
+      
+      for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
+        faimly = Bytes.toString((byte[]) entry.getKey());
+        familyMap = (NavigableMap<?,?>) entry.getValue();
+        for (Map.Entry<?,?> familyEntry : familyMap.entrySet()) {
+          qualify = Bytes.toString((byte[]) familyEntry.getKey());
+          valueLength = ((byte[]) familyEntry.getValue()).length;
+          sb.append(Constants.TAB);
+          sb.append(faimly + ":" + qualify + Constants.TAB + valueLength);
+          sb.append(Constants.LINE_SEPARATOR);
+        }
+      }
+      
     }
     
     File output = new File(outputFileName);
@@ -71,7 +110,7 @@ public class ScanTool {
     Configuration conf = new Configuration();
     conf.addResource("hbase-tools.xml");
     
-    ScanTool st = new ScanTool(conf, args);
-    st.runTool();
+    ScanTool st = new ScanTool();
+    st.runTool(conf, args);
   }
 }
