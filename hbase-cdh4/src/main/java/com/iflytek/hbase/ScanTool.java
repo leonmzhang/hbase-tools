@@ -103,10 +103,12 @@ public class ScanTool {
           
           valueLength = value.length;
           sb.append(Common.completionString("", 4));
-          sb.append(Common.completionString(family + ":" + qualify, 32)
+          sb.append(Common.completionString(family + ":" + qualify, ' ', 25,
+              false)
               + Common.completionString("", 4)
               + Common.completionString("" + valueLength, 16)
-              + Common.completionString("", 4) + date
+              + Common.completionString("", 4)
+              + date
               + Common.completionString("", 4)
               + Common.completionString(digest, '0', 32, true));
           sb.append(Constants.LINE_SEPARATOR);
