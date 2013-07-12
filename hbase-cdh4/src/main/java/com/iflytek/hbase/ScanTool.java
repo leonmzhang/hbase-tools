@@ -1,5 +1,9 @@
 package com.iflytek.hbase;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.conf.Configuration;
@@ -18,6 +22,7 @@ public class ScanTool {
   
   public ScanTool(Configuration conf, String[] args) throws Exception {
     options.addOption("n", "scan-number", true, "Number of scan count!");
+    options.addOption("o", "output", true, "Output file");
     cmdLine = Common.parseOptions(options, args);
     this.conf = new Configuration(conf);
   }
@@ -25,18 +30,27 @@ public class ScanTool {
   public void runTool() throws Exception {
     HTable table = new HTable(conf, "personal");
     int scanCount = 10; 
+    String outputFileName = "output";
     if(cmdLine.hasOption('n')) {
       scanCount = Integer.parseInt(cmdLine.getOptionValue('n'));
+    }
+    
+    if(cmdLine.hasOption('o')) {
+      outputFileName = cmdLine.getOptionValue('o');
     }
     
     Scan scan = new Scan();
     
     ResultScanner scanner = table.getScanner(scan);
     Result result = null;
-    while(scanCount-- > 0 && (result = scanner.next()) != null) {
-      System.out.println(Bytes.toString(result.getRow()));
-    } 
+    File output = new File(outputFileName);
+    PrintWriter pw = new PrintWriter(output);
     
+    while(scanCount-- > 0 && (result = scanner.next()) != null) {
+      pw.write(Bytes.toString(result.getRow()));
+    } 
+
+    pw.close();
     scanner.close();
     table.close();
   }

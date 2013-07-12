@@ -9,9 +9,12 @@ import org.apache.commons.cli.Parser;
 import org.apache.log4j.PropertyConfigurator;
 
 public class Common {
+  private static String logLevel = "INFO";
+  private static String logger = "CONSOLE";
+  
   private static void initLogProperties() {
     Properties properties = new Properties();
-    properties.setProperty("log4j.rootLogger", "DEBUG, CONSOLE");
+    properties.setProperty("log4j.rootLogger", logLevel + ", " + logger);
     properties.setProperty("log4j.appender.CONSOLE",
         "org.apache.log4j.ConsoleAppender");
     properties.setProperty("log4j.appender.CONSOLE.layout",
