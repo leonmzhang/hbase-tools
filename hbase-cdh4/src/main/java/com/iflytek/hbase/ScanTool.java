@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -13,6 +15,7 @@ import javax.swing.text.TabableView;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -76,6 +79,9 @@ public class ScanTool {
     NavigableMap<?,?> familyMap = null;
     MessageDigest msgDigest = MessageDigest.getInstance("MD5");
     BigInteger bigInt = null;
+    long timestamp = 0;
+    KeyValue kv = null;
+    String date = null;
     
     while (scanCount-- > 0 && (result = scanner.next()) != null) {
       row = Bytes.toString(result.getRow());
@@ -89,6 +95,11 @@ public class ScanTool {
         familyMap = (NavigableMap<?,?>) entry.getValue();
         for (Map.Entry<?,?> familyEntry : familyMap.entrySet()) {
           qualify = Bytes.toString((byte[]) familyEntry.getKey());
+          timestamp = result.getColumnLatest(Bytes.toBytes(faimly),
+              Bytes.toBytes(qualify)).getTimestamp();
+          date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(
+              timestamp));
+          
           value = (byte[]) familyEntry.getValue();
           bigInt = new BigInteger(1, msgDigest.digest(value));
           digest = bigInt.toString(16);
@@ -96,7 +107,7 @@ public class ScanTool {
           valueLength = value.length;
           sb.append(Constants.TAB);
           sb.append(faimly + ":" + qualify + Constants.TAB + valueLength
-              + Constants.TAB + digest);
+              + Constants.TAB + date + Constants.TAB + digest);
           sb.append(Constants.LINE_SEPARATOR);
         }
       }
