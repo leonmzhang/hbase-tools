@@ -90,7 +90,7 @@ public class ScanTool {
         for (Map.Entry<?,?> familyEntry : familyMap.entrySet()) {
           qualify = Bytes.toString((byte[]) familyEntry.getKey());
           value = (byte[]) familyEntry.getValue();
-          bigInt = new BigInteger(msgDigest.digest(value));
+          bigInt = new BigInteger(1, msgDigest.digest(value));
           digest = bigInt.toString(16);
           
           valueLength = value.length;
