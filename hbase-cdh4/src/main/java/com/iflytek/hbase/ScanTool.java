@@ -2,6 +2,8 @@ package com.iflytek.hbase;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -67,10 +69,13 @@ public class ScanTool {
     String column = null;
     String faimly = null;
     String qualify = null;
-    
+    byte[] value = null;
     int valueLength = 0;
+    String digest = null;
     NavigableMap<byte[],NavigableMap<byte[],byte[]>> noVersionMap = null;
     NavigableMap<?,?> familyMap = null;
+    MessageDigest msgDigest = MessageDigest.getInstance("MD5");
+    BigInteger bigInt = null;
     
     while (scanCount-- > 0 && (result = scanner.next()) != null) {
       row = Bytes.toString(result.getRow());
@@ -84,9 +89,14 @@ public class ScanTool {
         familyMap = (NavigableMap<?,?>) entry.getValue();
         for (Map.Entry<?,?> familyEntry : familyMap.entrySet()) {
           qualify = Bytes.toString((byte[]) familyEntry.getKey());
-          valueLength = ((byte[]) familyEntry.getValue()).length;
+          value = (byte[]) familyEntry.getValue();
+          bigInt = new BigInteger(msgDigest.digest(value));
+          digest = bigInt.toString(16);
+          
+          valueLength = value.length;
           sb.append(Constants.TAB);
-          sb.append(faimly + ":" + qualify + Constants.TAB + valueLength);
+          sb.append(faimly + ":" + qualify + Constants.TAB + valueLength
+              + Constants.TAB + digest);
           sb.append(Constants.LINE_SEPARATOR);
         }
       }
