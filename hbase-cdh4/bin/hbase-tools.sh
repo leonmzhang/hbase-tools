@@ -23,5 +23,5 @@ if [ ${COMMAND} = "scan" ]; then
   CLASS="com.iflytek.hbase.ScanTool"
 fi
 
-${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS}
+${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
 
