@@ -4,6 +4,6 @@
 <configuration>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>localhost</value>
+    <value>mirage-pro.hbase0001.gz.voicecloud.cn</value>
   </property>
 </configuration>
