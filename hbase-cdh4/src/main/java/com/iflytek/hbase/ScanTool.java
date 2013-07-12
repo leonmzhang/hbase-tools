@@ -6,11 +6,8 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
-
-import javax.swing.text.TabableView;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -106,8 +103,8 @@ public class ScanTool {
           
           valueLength = value.length;
           sb.append(Constants.TAB);
-          sb.append(faimly + ":" + qualify + Constants.TAB + valueLength
-              + Constants.TAB + date + Constants.TAB + digest);
+          sb.append(faimly + ":" + qualify + Constants.TRIPLE_TAB + valueLength
+              + Constants.DOUBLE_TAB + date + Constants.DOUBLE_TAB + digest);
           sb.append(Constants.LINE_SEPARATOR);
         }
       }
