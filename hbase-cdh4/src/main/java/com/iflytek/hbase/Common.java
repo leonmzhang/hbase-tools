@@ -33,4 +33,25 @@ public class Common {
     Parser paser = new GnuParser();
     return paser.parse(options, args);
   }
+  
+  public static String  completionString(String str, int len) {
+    return completionString(str, ' ', len, true);
+  }
+  
+  public static String  completionString(String str, char chr, int len, boolean left) {
+    if(str ==  null || str.length() >= len) {
+      return str;
+    }
+    StringBuilder sb = new StringBuilder();
+    for(int i = 0; i < len - str.length(); i++) {
+      sb.append(chr);
+    }
+    
+    if(left) {
+      sb.append(str);
+      return sb.toString();
+    } else {
+      return str + sb.toString();
+    }
+  }
 }

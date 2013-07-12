@@ -67,7 +67,7 @@ public class ScanTool {
     StringBuilder sb = new StringBuilder();
     String row = null;
     String column = null;
-    String faimly = null;
+    String family = null;
     String qualify = null;
     byte[] value = null;
     int valueLength = 0;
@@ -88,11 +88,11 @@ public class ScanTool {
       noVersionMap = result.getNoVersionMap();
       
       for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
-        faimly = Bytes.toString((byte[]) entry.getKey());
+        family = Bytes.toString((byte[]) entry.getKey());
         familyMap = (NavigableMap<?,?>) entry.getValue();
         for (Map.Entry<?,?> familyEntry : familyMap.entrySet()) {
           qualify = Bytes.toString((byte[]) familyEntry.getKey());
-          timestamp = result.getColumnLatest(Bytes.toBytes(faimly),
+          timestamp = result.getColumnLatest(Bytes.toBytes(family),
               Bytes.toBytes(qualify)).getTimestamp();
           date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(
               timestamp));
@@ -102,9 +102,13 @@ public class ScanTool {
           digest = bigInt.toString(16);
           
           valueLength = value.length;
-          sb.append(Constants.TAB);
-          sb.append(faimly + ":" + qualify + Constants.TRIPLE_TAB + valueLength
-              + Constants.DOUBLE_TAB + date + Constants.DOUBLE_TAB + digest);
+          sb.append(Common.completionString("", 4));
+          sb.append(Common.completionString(family + ":" + qualify, 32)
+              + Common.completionString("", 4)
+              + Common.completionString("" + valueLength, 16)
+              + Common.completionString("", 4) + date
+              + Common.completionString("", 4)
+              + Common.completionString(digest, '0', 32, true));
           sb.append(Constants.LINE_SEPARATOR);
         }
       }
@@ -129,6 +133,6 @@ public class ScanTool {
     conf.addResource("hbase-tools.xml");
     
     ScanTool st = new ScanTool();
-    st.runTool(conf, args);
+    // st.runTool(conf, args);
   }
 }
