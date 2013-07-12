@@ -133,6 +133,6 @@ public class ScanTool {
     conf.addResource("hbase-tools.xml");
     
     ScanTool st = new ScanTool();
-    // st.runTool(conf, args);
+    st.runTool(conf, args);
   }
 }
