@@ -22,6 +22,7 @@ public class ScanTool {
   public ScanTool(Configuration conf, String[] args) throws Exception {
     options.addOption("n", "scan-number", true, "Number of scan count!");
     options.addOption("o", "output", true, "Output file");
+    options.addOption("s", "start-row", true, "Start row");
     cmdLine = Common.parseOptions(options, args);
     this.conf = new Configuration(conf);
   }
@@ -39,6 +40,9 @@ public class ScanTool {
     }
     
     Scan scan = new Scan();
+    if(cmdLine.hasOption('s')) {
+      scan.setStartRow(Bytes.toBytes(cmdLine.getOptionValue('s')));
+    }
     
     ResultScanner scanner = table.getScanner(scan);
     Result result = null;
