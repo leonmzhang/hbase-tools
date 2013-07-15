@@ -19,8 +19,10 @@ JAVA=${JAVA_HOME}/bin/java
 COMMAND=$1
 shift
 
-if [ ${COMMAND} = "scan" ]; then
+if [ "${COMMAND}" = "scan" ]; then
   CLASS="com.iflytek.hbase.ScanTool"
+elif [ "${COMMAND}" = "get" ]; then
+  CLASS="com.iflytek.hbase.GetTool"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
