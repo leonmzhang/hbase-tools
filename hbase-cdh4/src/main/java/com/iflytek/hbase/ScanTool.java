@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.KeyValue;
@@ -34,8 +35,9 @@ public class ScanTool {
     options.addOption("t", "table", true, "table name");
   }
   
-  private void usage() {
-    
+  public void usage() {
+    HelpFormatter hf = new HelpFormatter();
+    hf.printHelp("scan [-p][-v/--verbose][--block-size][-h/--help]", options);
   }
   
   public void runTool(Configuration conf, String[] args) throws Exception {
