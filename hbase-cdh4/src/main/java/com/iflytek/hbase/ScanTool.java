@@ -30,7 +30,7 @@ public class ScanTool {
     options.addOption("n", "scan-number", true, "Number of scan count!");
     options.addOption("o", "output", true, "Output file");
     options.addOption("s", "start-row", true, "Start row");
-    options.addOption("h", "help", false, "help");
+    //options.addOption("h", "help", false, "help");
     options.addOption("t", "table", true, "table name");
   }
   
@@ -123,7 +123,6 @@ public class ScanTool {
           sb.append(Constants.LINE_SEPARATOR);
         }
       }
-      
     }
     
     File output = new File(outputFileName);

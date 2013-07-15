@@ -22,7 +22,7 @@ public class GetTool implements Tool {
     setConf(conf);
     options.addOption("r", "row", true, "row key");
     options.addOption("o", "output", true, "Output file");
-    options.addOption("h", "help", false, "help");
+    //options.addOption("h", "help", false, "help");
     options.addOption("t", "table", true, "table name");
     options.addOption("c", "column", true, "column, format: family:qualify");
   }
@@ -105,6 +105,8 @@ public class GetTool implements Tool {
    * @param args
    */
   public static void main(String[] args) throws Exception {
+    Common.globalInit();
+    
     Configuration conf = new Configuration();
     conf.addResource("hbase-tools.xml");
     GetTool gt = new GetTool(conf);
