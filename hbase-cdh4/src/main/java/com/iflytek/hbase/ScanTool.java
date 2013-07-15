@@ -31,6 +31,7 @@ public class ScanTool {
     options.addOption("o", "output", true, "Output file");
     options.addOption("s", "start-row", true, "Start row");
     options.addOption("h", "help", false, "help");
+    options.addOption("t", "table", true, "table name");
   }
   
   private void usage() {
@@ -45,7 +46,15 @@ public class ScanTool {
       return;
     }
     
-    HTable table = new HTable(conf, "personal");
+    String tableName = null;
+    if (cmdLine.hasOption('t')) {
+      tableName = cmdLine.getOptionValue('t');
+    } else {
+      usage();
+      return;
+    }
+    
+    HTable table = new HTable(conf, tableName);
     int scanCount = 10;
     String outputFileName = "output";
     if (cmdLine.hasOption('n')) {
@@ -106,7 +115,7 @@ public class ScanTool {
           sb.append(Common.completionString(family + ":" + qualify, ' ', 25,
               false)
               + Common.completionString("", 4)
-              + Common.completionString("" + valueLength, 16)
+              + Common.completionString("" + valueLength, 10)
               + Common.completionString("", 4)
               + date
               + Common.completionString("", 4)
