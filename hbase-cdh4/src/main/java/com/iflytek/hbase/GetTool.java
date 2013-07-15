@@ -34,7 +34,7 @@ public class GetTool implements Tool {
   
   @Override
   public void setConf(Configuration conf) {
-    conf = new Configuration(conf);
+    this.conf = new Configuration(conf);
   }
   
   public void usage() {
@@ -87,6 +87,7 @@ public class GetTool implements Tool {
     }
     
     HTable table = new HTable(conf, tableName);
+
     Get get = new Get(Bytes.toBytes(row));
     get.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualify));
     Result result = table.get(get);
@@ -96,6 +97,7 @@ public class GetTool implements Tool {
     FileOutputStream fos = new FileOutputStream(new File(outputFileName));
     fos.write(value);
     fos.close();
+    table.close();
     return 0;
   }
   
@@ -105,6 +107,7 @@ public class GetTool implements Tool {
   public static void main(String[] args) throws Exception {
     Configuration conf = new Configuration();
     conf.addResource("hbase-tools.xml");
-    ToolRunner.run(new GetTool(conf), args);
+    GetTool gt = new GetTool(conf);
+    ToolRunner.run(gt, args);
   }
 }
