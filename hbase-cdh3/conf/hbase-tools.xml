@@ -4,7 +4,7 @@
 <configuration>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>mirage-pro.hbase0001.gz.voicecloud.cn</value>
+    <value>192.168.150.16,192.168.150.17,192.168.150.18,192.168.150.19,192.168.150.20</value>
   </property>
   <property>
     <name>scan.min.date</name>
