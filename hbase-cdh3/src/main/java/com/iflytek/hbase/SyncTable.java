@@ -3,6 +3,8 @@ package com.iflytek.hbase;
 import java.io.File;
 import java.io.PrintWriter;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -17,9 +19,12 @@ import org.apache.hadoop.util.ToolRunner;
 public class SyncTable implements Tool {
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   private Configuration conf;
+  private Options options = new Options();
+  private CommandLine cmdLine;
   
   public SyncTable(Configuration conf) {
     setConf(conf);
+    options.addOption("n", "number", true, "number of scan");
   }
   
   @Override
@@ -34,6 +39,13 @@ public class SyncTable implements Tool {
   
   @Override
   public int run(String[] args) throws Exception {
+    cmdLine = Common.parseOptions(options, args);
+    
+    int scanCount = 10;
+    if(cmdLine.hasOption('n')) {
+      scanCount = Integer.parseInt(cmdLine.getOptionValue('n'));
+    }
+    
     Scan scan = new Scan();
     String minDateStr = conf.get(Constants.SCAN_MIN_DATE);
     String maxDateStr = conf.get(Constants.SCAN_MAX_DATE);
@@ -47,7 +59,7 @@ public class SyncTable implements Tool {
     Result result = null;
     
     StringBuilder sb = new StringBuilder();
-    while((result = scanner.next()) != null) {
+    while(scanCount-- > 0 && (result = scanner.next()) != null) {
       sb.append(Bytes.toString(result.getRow()));
       sb.append(Constants.LINE_SEPARATOR);
     }
