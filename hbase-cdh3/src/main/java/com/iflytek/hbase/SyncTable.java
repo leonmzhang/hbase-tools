@@ -42,7 +42,7 @@ public class SyncTable implements Tool {
     scan.setTimeRange(minStamp, maxStamp);
     scan.addFamily(Bytes.toBytes("cf"));
     
-    HTable table = new HTable("personal");
+    HTable table = new HTable(conf, "personal");
     ResultScanner scanner = table.getScanner(scan);
     Result result = null;
     
