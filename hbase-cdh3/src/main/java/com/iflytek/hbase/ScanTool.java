@@ -114,7 +114,7 @@ public class ScanTool {
           
           valueLength = value.length;
           sb.append(Common.completionString("", 4));
-          sb.append(Common.completionString(family + ":" + qualify, ' ', 25,
+          sb.append(Common.completionString(family + ":" + qualify, ' ', 64,
               false)
               + Common.completionString("", 4)
               + Common.completionString("" + valueLength, 10)
