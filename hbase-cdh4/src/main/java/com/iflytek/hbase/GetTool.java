@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
@@ -14,6 +16,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class GetTool implements Tool {
+  
   private Configuration conf = null;
   private CommandLine cmdLine = null;
   private Options options = new Options();
@@ -22,7 +25,7 @@ public class GetTool implements Tool {
     setConf(conf);
     options.addOption("r", "row", true, "row key");
     options.addOption("o", "output", true, "Output file");
-    //options.addOption("h", "help", false, "help");
+    options.addOption("h", "help", false, "help");
     options.addOption("t", "table", true, "table name");
     options.addOption("c", "column", true, "column, format: family:qualify");
   }

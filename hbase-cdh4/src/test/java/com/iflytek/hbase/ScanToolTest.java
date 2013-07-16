@@ -6,7 +6,7 @@ public class ScanToolTest {
   
   @Test
   public void usageCase() throws Exception {
-    ScanTool st = new ScanTool();
-    st.usage();
+     ScanTool st = new ScanTool();
+     st.usage();
   }
 }

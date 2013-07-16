@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>mirage-pro.hbase0001.gz.voicecloud.cn</value>
+  </property>
+  <property>
+    <name>scan.min.date</name>
+    <value>2013-06-28 21:40:00</value>
+    <description>date format: yyyy-MM-dd HH:mm:ss</description>
+  </property>
+  <property>
+    <name>scan.max.date</name>
+    <value>2013-12-31 23:59:59</value>
+    <description>date format: yyyy-MM-dd HH:mm:ss</description>
+  </property>
+</configuration>
