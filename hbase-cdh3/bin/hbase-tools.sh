@@ -10,6 +10,7 @@ if [ $# = 0 ]; then
   echo "    get     get"
   echo "    put     put"
   echo "    sync    sync"
+  echo "    trans   trans"
   
   exit 1
 fi
@@ -26,6 +27,8 @@ elif [ "${COMMAND}" = "get" ]; then
   CLASS="com.iflytek.hbase.GetTool"
 elif [ "${COMMAND}" = "sync" ]; then
   CLASS="com.iflytek.hbase.SyncTable"
+elif [ "${COMMAND}" = "trans" ]; then
+  CLASS="com.iflytek.hbase.TransTool"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
