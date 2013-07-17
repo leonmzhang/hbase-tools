@@ -6,7 +6,7 @@ public class PersonalUtilTest {
   
   @Test
   public void cleanRowKeyCase() {
-    PersonalUtil.cleanRowKey("");
+
   }
   
 }

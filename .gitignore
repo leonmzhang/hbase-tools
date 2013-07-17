@@ -1,6 +1,8 @@
 hbase-cdh4/target
 hbase-cdh3/target
+hbase-share/target
 .classpath
 .project
 *.jar
 .settings
+output

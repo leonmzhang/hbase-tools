@@ -12,6 +12,7 @@
   <modules>
     <module>hbase-cdh3</module>
     <module>hbase-cdh4</module>
+    <module>hbase-share</module>
   </modules>
 
 </project>
