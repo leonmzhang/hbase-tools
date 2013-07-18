@@ -86,10 +86,12 @@ public class SyncTable implements Tool {
   public class Worker implements Runnable {
     private Configuration conf;
     private Configuration srcConf;
+    private String key;
     
     public Worker(Configuration conf, String key) {
       this.conf = new Configuration(conf);
       this.srcConf = new Configuration(conf);
+      this.key = key;
     }
     
     @Override
@@ -119,10 +121,16 @@ public class SyncTable implements Tool {
       MessageDigest msgDigest = null;
       int valueLength = 0;
       
+      String[] array = key.split(";");
+      String startRow = array[0];
+      String endRow = array[1];
+      
       try {
         msgDigest = MessageDigest.getInstance("MD5");
         scan.setTimeRange(minStamp, maxStamp);
         scan.addFamily(Bytes.toBytes("cf"));
+        scan.setStartRow(Bytes.toBytes(startRow));
+        scan.setStopRow(Bytes.toBytes(endRow));
         scanner = table.getScanner(scan);
         while ((result = scanner.next()) != null) {
           sb = new StringBuilder();
