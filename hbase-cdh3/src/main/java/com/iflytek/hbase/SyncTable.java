@@ -37,6 +37,7 @@ import org.apache.thrift.transport.TTransportException;
 
 import com.iflytek.hbase.thrift.generated.Hbase;
 import com.iflytek.hbase.thrift.generated.Mutation;
+import com.iflytek.hbase.thrift.generated.TCell;
 import com.iflytek.personal.Personal;
 import com.iflytek.personal.PersonalParseException;
 import com.iflytek.personal.PersonalUtil;
@@ -219,8 +220,17 @@ public class SyncTable implements Tool {
                     .toBytes(personal.getHbaseCell().getTable()));
                 ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(personal
                     .getHbaseCell().getRowKey()));
-                
-                client.mutateRowTs(newTableName, newRow, mutations, timestamp, attributes);
+                ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(personal
+                    .getHbaseCell().getColumn()));
+                List<TCell> cellList = client.get(newTableName, newRow,
+                    newColumn, attributes);
+                if (cellList.isEmpty()) {
+                  client.mutateRowTs(newTableName, newRow, mutations,
+                      timestamp, attributes);
+                } else if (cellList.get(0).timestamp < timestamp) {
+                  client.mutateRowTs(newTableName, newRow, mutations,
+                      timestamp, attributes);
+                }
               } catch (PersonalParseException e) {
                 LOG.warn("", e);
               } catch (Exception e) {
