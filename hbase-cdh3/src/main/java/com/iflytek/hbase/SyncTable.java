@@ -184,6 +184,7 @@ public class SyncTable implements Tool {
                     + personal.getHbaseCell().getQualify(), ' ', 64, false)
                     + Common.completionString("", 4)
                     + Common.completionString("" + valueLength, 10)
+                    + Common.completionString("", 4)                    
                     + date
                     + Common.completionString("", 4)
                     + Common.completionString(digest, '0', 32, true));
@@ -193,7 +194,7 @@ public class SyncTable implements Tool {
               }
             }
           }
-          sb.append(newSb);
+          sb.append(newSb + Constants.LINE_SEPARATOR);
           printQueue.put(sb);
           count = totalCount.incrementAndGet();
           if (count % 1000 == 0) {
