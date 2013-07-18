@@ -19,6 +19,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.mortbay.log.Log;
 
 public class ScanTool {
   
@@ -145,6 +146,9 @@ public class ScanTool {
     conf.addResource("hbase-tools.xml");
     
     ScanTool st = new ScanTool();
+    long startTime = System.currentTimeMillis();
     st.runTool(conf, args);
+    long endTime = System.currentTimeMillis();
+    Log.info("Total time cost: " + (endTime - startTime));
   }
 }
