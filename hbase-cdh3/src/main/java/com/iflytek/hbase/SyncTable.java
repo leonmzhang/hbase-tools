@@ -183,15 +183,17 @@ public class SyncTable implements Tool {
         do {
           try {
             result = scanner.next();
-            if(result == null) {
+            if (result == null) {
               break;
             }
           } catch (ScannerTimeoutException e) {
+            LOG.warn("scanner timeout, get scanner from last row: "
+                + scanLastRow, e);
             scan.setStartRow(Bytes.toBytes(scanLastRow));
             scanner = table.getScanner(scan);
             continue;
           }
-
+          
           sb = new StringBuilder();
           srcRowMsg = new RowMessage();
           desRowMsg = new RowMessage();
@@ -261,7 +263,7 @@ public class SyncTable implements Tool {
           if (count % 1000 == 0) {
             LOG.info("Already scan: " + count);
           }
-        } while(result != null);
+        } while (result != null);
       } catch (Exception e) {
         LOG.warn("", e);
       } finally {
