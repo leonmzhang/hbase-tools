@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.concurrent.BlockingQueue;
@@ -17,8 +18,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -27,9 +26,15 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.thrift.generated.Hbase;
+import org.apache.hadoop.hbase.thrift.generated.Mutation;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
 
 import com.iflytek.personal.Personal;
 import com.iflytek.personal.PersonalParseException;
@@ -38,14 +43,16 @@ import com.iflytek.personal.RowMessage;
 
 public class SyncTable implements Tool {
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
+  
+  private ArrayList<String> thriftServers = new ArrayList<String>();
+  
+  private String getDesThriftServer() {
+    int index = (int) (Math.random() * (float) thriftServers.size());
+    return thriftServers.get(index);
+  }
+  
   private Configuration conf;
-  private Configuration srcConf;
-  private Configuration desConf;
-  private Options options = new Options();
-  private CommandLine cmdLine;
-  
   private HTablePool tablePool;
-  
   private BlockingQueue<StringBuilder> printQueue;
   private boolean printSignal;
   
@@ -53,8 +60,6 @@ public class SyncTable implements Tool {
   
   public SyncTable(Configuration conf) {
     this.conf = new Configuration(conf);
-    this.srcConf = new Configuration(conf);
-    this.desConf = new Configuration();
   }
   
   public class Printer implements Runnable {
@@ -90,19 +95,38 @@ public class SyncTable implements Tool {
   }
   
   public class Worker implements Runnable {
-    private Configuration conf;
-    private Configuration srcConf;
     private String key;
+    private TTransport transport;
+    private TProtocol protocol;
+    private Hbase.Client client;
+    private HTableInterface table;
     
-    public Worker(Configuration conf, String key) {
-      this.conf = new Configuration(conf);
-      this.srcConf = new Configuration(conf);
+    public Worker(String key) {
       this.key = key;
+    }
+    
+    private void setup() {
+      String host = getDesThriftServer();
+      int port = 9090;
+      transport = new TSocket(host, port);
+      protocol = new TBinaryProtocol(transport);
+      client = new Hbase.Client(protocol);
+      
+      table = tablePool.getTable("personal");
+    }
+    
+    private void cleanup() {
+      transport.close();
+      try {
+        table.close();
+      } catch (IOException e) {
+        LOG.warn("", e);
+      }
     }
     
     @Override
     public void run() {
-      HTableInterface table = tablePool.getTable("personal");
+      setup();
       
       Scan scan = new Scan();
       String minDateStr = conf.get(Constants.SCAN_MIN_DATE);
@@ -112,7 +136,6 @@ public class SyncTable implements Tool {
       ResultScanner scanner = null;
       Result result = null;
       StringBuilder sb = null;
-      StringBuilder newSb = null;
       RowMessage srcRowMsg = null;
       RowMessage desRowMsg = null;
       
@@ -123,10 +146,8 @@ public class SyncTable implements Tool {
       String family = null;
       String qualify = null;
       long timestamp = 0;
-      String date = null;
       byte[] value;
       BigInteger bigInt = null;
-//      String digest = null;
       MessageDigest msgDigest = null;
       int valueLength = 0;
       
@@ -136,6 +157,10 @@ public class SyncTable implements Tool {
       
       int count = 0;
       
+      Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
+      Mutation mutation = null;
+      List<Mutation> mutations = null;
+      
       try {
         msgDigest = MessageDigest.getInstance("MD5");
         scan.setTimeRange(minStamp, maxStamp);
@@ -143,14 +168,13 @@ public class SyncTable implements Tool {
         scan.setStartRow(Bytes.toBytes(startRow));
         scan.setStopRow(Bytes.toBytes(endRow));
         scanner = table.getScanner(scan);
+        
         while ((result = scanner.next()) != null) {
           sb = new StringBuilder();
           srcRowMsg = new RowMessage();
           desRowMsg = new RowMessage();
           
           row = Bytes.toString(result.getRow());
-          // sb.append(row);
-          // sb.append(Constants.LINE_SEPARATOR);
           noVersionMap = result.getNoVersionMap();
           
           for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
@@ -160,28 +184,15 @@ public class SyncTable implements Tool {
               qualify = Bytes.toString((byte[]) familyEntry.getKey());
               timestamp = result.getColumnLatest(Bytes.toBytes(family),
                   Bytes.toBytes(qualify)).getTimestamp();
-              date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                  .format(new Date(timestamp));
               value = (byte[]) familyEntry.getValue();
               bigInt = new BigInteger(1, msgDigest.digest(value));
-              // digest = bigInt.toString(16);
               valueLength = value.length;
               
               srcRowMsg.appendRow(row);
               srcRowMsg.appendCellMsg(family, qualify, timestamp, valueLength,
                   bigInt);
               
-              // sb.append(Common.completionString("", 4));
-              // sb.append(Common.completionString(family + ":" + qualify, ' ',
-              // 64, false)
-              // + Common.completionString("", 4)
-              // + Common.completionString("" + valueLength, 10)
-              // + Common.completionString("", 4)
-              // + date
-              // + Common.completionString("", 4)
-              // + Common.completionString(digest, '0', 32, true));
-              // sb.append(Constants.LINE_SEPARATOR);
-              
+              // new peronsal data format
               Personal personal = new Personal();
               try {
                 personal.parsePersonalData(row, family, qualify, value);
@@ -189,19 +200,17 @@ public class SyncTable implements Tool {
                 desRowMsg.appendCellMsg(personal.getHbaseCell().getFamily(),
                     personal.getHbaseCell().getQualify(), timestamp,
                     valueLength, bigInt);
-//                newSb.append(personal.getHbaseCell().getRowKey()
-//                    + Constants.LINE_SEPARATOR);
-//                newSb.append(Common.completionString("", 4));
-//                newSb.append(Common.completionString(personal.getHbaseCell()
-//                    .getFamily() + ":" + personal.getHbaseCell().getQualify(),
-//                    ' ', 64, false)
-//                    + Common.completionString("", 4)
-//                    + Common.completionString("" + valueLength, 10)
-//                    + Common.completionString("", 4)
-//                    + date
-//                    + Common.completionString("", 4)
-//                    + Common.completionString(digest, '0', 32, true));
-//                newSb.append(Constants.LINE_SEPARATOR);
+                
+                mutations = new ArrayList<Mutation>();
+                mutation = new Mutation();
+                mutation.setColumn(Bytes.toBytes(personal.getHbaseCell()
+                    .getColumn()));
+                mutation.setValue(value);
+                mutations.add(mutation);
+                client.mutateRowTs(ByteBuffer.wrap(Bytes.toBytes(personal
+                    .getHbaseCell().getTable())), ByteBuffer.wrap(Bytes
+                    .toBytes(personal.getHbaseCell().getRowKey())), mutations,
+                    timestamp, attributes);
               } catch (PersonalParseException e) {
                 LOG.warn("", e);
               }
@@ -216,32 +225,30 @@ public class SyncTable implements Tool {
             LOG.info("Already scan: " + count);
           }
         }
-      } catch (IOException e) {
-        LOG.warn("", e);
-      } catch (NoSuchAlgorithmException e) {
-        LOG.warn("", e);
-      } catch (InterruptedException e) {
+      } catch (Exception e) {
         LOG.warn("", e);
       } finally {
         if (scanner != null) {
           scanner.close();
         }
-        try {
-          table.close();
-        } catch (IOException e) {
-          LOG.warn("", e);
-        }
       }
+      cleanup();
     }
   }
   
   private void setup(String[] args) throws Exception {
-    options.addOption("n", "number", true, "number of scan");
-    tablePool = new HTablePool(srcConf, 1024);
-    cmdLine = Common.parseOptions(options, args);
+    conf.set(Constants.HBASE_ZOOKEEPER_QUORUM,
+        conf.get(Constants.SRC_HBASE_ZOOKEEPER_QUORUM));
+    tablePool = new HTablePool(conf, 1024);
     printQueue = new LinkedBlockingDeque<StringBuilder>();
     printSignal = true;
     totalCount = new AtomicInteger();
+    
+    String thriftServerStr = conf.get(Constants.DES_HBASE_THRIFT_SERVERS);
+    String[] thriftServerArray = thriftServerStr.split(",");
+    for (String server : thriftServerArray) {
+      thriftServers.add(server);
+    }
   }
   
   private void cleanup() throws Exception {
@@ -271,7 +278,7 @@ public class SyncTable implements Tool {
     int threadPoolSize = PersonalUtil.KEY.length;
     ExecutorService exec = Executors.newFixedThreadPool(threadPoolSize);
     for (int i = 0; i < threadPoolSize; i++) {
-      exec.execute(new Worker(conf, PersonalUtil.KEY[i]));
+      exec.execute(new Worker(PersonalUtil.KEY[i]));
     }
     exec.shutdown();
     while (!exec.isTerminated()) {

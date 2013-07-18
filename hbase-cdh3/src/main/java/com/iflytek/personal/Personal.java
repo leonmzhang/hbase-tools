@@ -12,6 +12,7 @@ public class Personal {
   private static final String ROOT = "root";
   private static final String FILE_NAME = "file_name";
   private static final String TYPE = "type";
+  private static final String TABLE = "table";
   
   private HbaseCell cell = new HbaseCell();
   
@@ -42,6 +43,7 @@ public class Personal {
     if((appid = kvMap.get(APPID)) != null) {
       rowKey = rowKey + "@" + appid;
     }
+    cell.setTable(kvMap.get(TABLE));
     cell.setRowKey(rowKey);
     cell.setQualify(kvMap.get(TYPE));
     cell.setValue(value);
@@ -76,11 +78,15 @@ public class Personal {
     String[] fileNameArray = fileName.split("@");
     String type = null;
     String prefix = null;
+    String table = null;
     if (fileName.contains(IRF)) {
       type = IRF;
+      table = PersonalUtil.PERSONAL_IRF;
     } else if (fileName.contains(WAV)) {
       type = WAV;
+      table = PersonalUtil.PERSONAL_WAV;
     } else {
+      table = PersonalUtil.PERSONAL;
       prefix = pathArray[0];
       if (ROOT.equals(prefix)) {
         throw new PersonalParseException();
@@ -94,6 +100,7 @@ public class Personal {
       }
     }
     kvMap.put(TYPE, type);
+    kvMap.put(TABLE, table);
     return kvMap;
   }
 }

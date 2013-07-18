@@ -6,6 +6,16 @@
     <name>hbase.zookeeper.quorum</name>
     <value>192.168.150.16,192.168.150.17,192.168.150.18,192.168.150.19,192.168.150.20</value>
   </property>
+
+  <!-- data sync -->
+  <property>
+    <name>src.hbase.zookeeper.quorum</name>
+    <value>192.168.150.16,192.168.150.17,192.168.150.18,192.168.150.19,192.168.150.20</value>
+  </property>
+  <property>
+    <name>des.hbase.thrift.servers</name>
+    <value>192.168.150.22,192.168.150.23,192.168.150.24,192.168.150.25</value>
+  </property>
   <property>
     <name>scan.min.date</name>
     <value>2013-06-28 21:40:00</value>
