@@ -26,8 +26,6 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.thrift.generated.Hbase;
-import org.apache.hadoop.hbase.thrift.generated.Mutation;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -37,6 +35,8 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
+import com.iflytek.hbase.thrift.generated.Hbase;
+import com.iflytek.hbase.thrift.generated.Mutation;
 import com.iflytek.personal.Personal;
 import com.iflytek.personal.PersonalParseException;
 import com.iflytek.personal.PersonalUtil;
@@ -220,8 +220,7 @@ public class SyncTable implements Tool {
                 ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(personal
                     .getHbaseCell().getRowKey()));
                 
-                client.mutateRowTs(newTableName, newRow, mutations, timestamp,
-                    attributes);
+                client.mutateRowTs(newTableName, newRow, mutations, timestamp, attributes);
               } catch (PersonalParseException e) {
                 LOG.warn("", e);
               } catch (Exception e) {
