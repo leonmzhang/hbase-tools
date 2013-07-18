@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -29,6 +30,7 @@ public class ScanTool {
   private CommandLine cmdLine;
   
   private Configuration conf;
+  private AtomicInteger totalCount = new AtomicInteger(0);
   
   public ScanTool() throws Exception {
     options.addOption("n", "scan-number", true, "Number of scan count!");
@@ -128,6 +130,11 @@ public class ScanTool {
           sb.append(Constants.LINE_SEPARATOR);
         }
       }
+      int count = totalCount.incrementAndGet();
+      if(count % 1000 == 0) {
+        LOG.info("Already scan count: " + count);
+      }
+      
     }
     
     File output = new File(outputFileName);

@@ -16,33 +16,26 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-public class SyncTable implements Tool {
+public class SyncTable {
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   private Configuration conf;
+  private Configuration srcConf;
+  private Configuration desConf;
   private Options options = new Options();
   private CommandLine cmdLine;
   
   public SyncTable(Configuration conf) {
-    setConf(conf);
+    this.conf = new Configuration(conf);
+    this.srcConf = new Configuration();
+    this.desConf = new Configuration();
     options.addOption("n", "number", true, "number of scan");
   }
   
-  @Override
-  public Configuration getConf() {
-    return conf;
-  }
-  
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = new Configuration(conf);
-  }
-  
-  @Override
-  public int run(String[] args) throws Exception {
+  public int runTool(String[] args) throws Exception {
     cmdLine = Common.parseOptions(options, args);
     
     int scanCount = 10;
-    if(cmdLine.hasOption('n')) {
+    if (cmdLine.hasOption('n')) {
       scanCount = Integer.parseInt(cmdLine.getOptionValue('n'));
     }
     
@@ -59,7 +52,7 @@ public class SyncTable implements Tool {
     Result result = null;
     
     StringBuilder sb = new StringBuilder();
-    while(scanCount-- > 0 && (result = scanner.next()) != null) {
+    while (scanCount-- > 0 && (result = scanner.next()) != null) {
       sb.append(Bytes.toString(result.getRow()));
       sb.append(Constants.LINE_SEPARATOR);
     }
@@ -81,7 +74,8 @@ public class SyncTable implements Tool {
     
     Configuration conf = new Configuration();
     conf.addResource("hbase-tools.xml");
+    
     SyncTable st = new SyncTable(conf);
-    ToolRunner.run(st, args);
+    st.runTool(args);
   }
 }
