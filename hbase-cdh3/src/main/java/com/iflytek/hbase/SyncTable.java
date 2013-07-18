@@ -35,6 +35,7 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 
 import com.iflytek.personal.Personal;
 import com.iflytek.personal.PersonalParseException;
@@ -105,12 +106,13 @@ public class SyncTable implements Tool {
       this.key = key;
     }
     
-    private void setup() {
+    private void setup() throws TTransportException {
       String host = getDesThriftServer();
       int port = 9090;
       transport = new TSocket(host, port);
       protocol = new TBinaryProtocol(transport);
       client = new Hbase.Client(protocol);
+      transport.open();
       
       table = tablePool.getTable("personal");
     }
@@ -126,7 +128,13 @@ public class SyncTable implements Tool {
     
     @Override
     public void run() {
-      setup();
+      try {
+        setup();
+      } catch (TTransportException e) {
+        LOG.warn("", e);
+        cleanup();
+        return;
+      }
       
       Scan scan = new Scan();
       String minDateStr = conf.get(Constants.SCAN_MIN_DATE);
