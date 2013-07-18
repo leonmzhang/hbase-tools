@@ -31,6 +31,8 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import com.iflytek.personal.Personal;
+import com.iflytek.personal.PersonalParseException;
 import com.iflytek.personal.PersonalUtil;
 
 public class SyncTable implements Tool {
@@ -109,6 +111,7 @@ public class SyncTable implements Tool {
       ResultScanner scanner = null;
       Result result = null;
       StringBuilder sb = null;
+      StringBuilder newSb = null;
       
       NavigableMap<byte[],NavigableMap<byte[],byte[]>> noVersionMap = null;
       NavigableMap<?,?> familyMap = null;
@@ -139,7 +142,8 @@ public class SyncTable implements Tool {
         scanner = table.getScanner(scan);
         while ((result = scanner.next()) != null) {
           sb = new StringBuilder();
-          // ---
+          newSb = new StringBuilder();
+          
           row = Bytes.toString(result.getRow());
           sb.append(row);
           sb.append(Constants.LINE_SEPARATOR);
@@ -154,12 +158,11 @@ public class SyncTable implements Tool {
                   Bytes.toBytes(qualify)).getTimestamp();
               date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                   .format(new Date(timestamp));
-              
               value = (byte[]) familyEntry.getValue();
               bigInt = new BigInteger(1, msgDigest.digest(value));
               digest = bigInt.toString(16);
-              
               valueLength = value.length;
+              
               sb.append(Common.completionString("", 4));
               sb.append(Common.completionString(family + ":" + qualify, ' ',
                   64, false)
@@ -170,11 +173,30 @@ public class SyncTable implements Tool {
                   + Common.completionString("", 4)
                   + Common.completionString(digest, '0', 32, true));
               sb.append(Constants.LINE_SEPARATOR);
+              
+              Personal personal = new Personal();
+              try {
+                personal.parsePersonalData(row, family, qualify, value);
+                newSb.append(personal.getHbaseCell().getRowKey()
+                    + Constants.LINE_SEPARATOR);
+                newSb.append(Common.completionString("", 4));
+                newSb.append(Common.completionString(personal.getHbaseCell().getFamily() + ":"
+                    + personal.getHbaseCell().getQualify(), ' ', 64, false)
+                    + Common.completionString("", 4)
+                    + Common.completionString("" + valueLength, 10)
+                    + date
+                    + Common.completionString("", 4)
+                    + Common.completionString(digest, '0', 32, true));
+                newSb.append(Constants.LINE_SEPARATOR);
+              } catch (PersonalParseException e) {
+                LOG.warn("", e);
+              }
             }
           }
+          sb.append(newSb);
           printQueue.put(sb);
           count = totalCount.incrementAndGet();
-          if(count % 1000 == 0) {
+          if (count % 1000 == 0) {
             LOG.info("Already scan: " + count);
           }
         }

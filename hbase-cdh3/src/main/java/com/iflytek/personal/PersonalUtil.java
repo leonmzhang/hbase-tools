@@ -52,4 +52,10 @@ public class PersonalUtil {
     prefixMap.put(PANDA, "");
     prefixMap.put(TVWORD, "");
   }
+  
+  public static StringBuilder buildRowMsg(String row) {
+    StringBuilder sb = new StringBuilder();
+    
+    return sb;
+  }
 }

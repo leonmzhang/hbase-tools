@@ -63,6 +63,9 @@ public class Common {
   }
   
   public static long dateStrToUnixTimestamp(String dateStr) {
+    if(dateStr == null) {
+      return 0;
+    }
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     try {
       Date date = sdf.parse(dateStr);
