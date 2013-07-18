@@ -47,7 +47,7 @@ public class SyncTable implements Tool {
   
   public SyncTable(Configuration conf) {
     this.conf = new Configuration(conf);
-    this.srcConf = new Configuration();
+    this.srcConf = new Configuration(conf);
     this.desConf = new Configuration();
   }
   
