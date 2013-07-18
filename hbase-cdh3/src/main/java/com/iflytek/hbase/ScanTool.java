@@ -12,6 +12,8 @@ import java.util.NavigableMap;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.HTable;
@@ -19,9 +21,9 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.mortbay.log.Log;
 
 public class ScanTool {
+  private static final Log LOG = LogFactory.getLog(ScanTool.class);
   
   private Options options = new Options();
   private CommandLine cmdLine;
@@ -149,6 +151,6 @@ public class ScanTool {
     long startTime = System.currentTimeMillis();
     st.runTool(conf, args);
     long endTime = System.currentTimeMillis();
-    Log.info("Total time cost: " + (endTime - startTime));
+    LOG.info("Total time cost: " + (endTime - startTime) + "ms");
   }
 }
