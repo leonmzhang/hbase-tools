@@ -34,6 +34,7 @@ import org.apache.hadoop.util.ToolRunner;
 import com.iflytek.personal.Personal;
 import com.iflytek.personal.PersonalParseException;
 import com.iflytek.personal.PersonalUtil;
+import com.iflytek.personal.RowMessage;
 
 public class SyncTable implements Tool {
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
@@ -112,6 +113,8 @@ public class SyncTable implements Tool {
       Result result = null;
       StringBuilder sb = null;
       StringBuilder newSb = null;
+      RowMessage srcRowMsg = null;
+      RowMessage desRowMsg = null;
       
       NavigableMap<byte[],NavigableMap<byte[],byte[]>> noVersionMap = null;
       NavigableMap<?,?> familyMap = null;
@@ -123,7 +126,7 @@ public class SyncTable implements Tool {
       String date = null;
       byte[] value;
       BigInteger bigInt = null;
-      String digest = null;
+//      String digest = null;
       MessageDigest msgDigest = null;
       int valueLength = 0;
       
@@ -142,11 +145,12 @@ public class SyncTable implements Tool {
         scanner = table.getScanner(scan);
         while ((result = scanner.next()) != null) {
           sb = new StringBuilder();
-          newSb = new StringBuilder();
+          srcRowMsg = new RowMessage();
+          desRowMsg = new RowMessage();
           
           row = Bytes.toString(result.getRow());
-          sb.append(row);
-          sb.append(Constants.LINE_SEPARATOR);
+          // sb.append(row);
+          // sb.append(Constants.LINE_SEPARATOR);
           noVersionMap = result.getNoVersionMap();
           
           for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
@@ -160,41 +164,52 @@ public class SyncTable implements Tool {
                   .format(new Date(timestamp));
               value = (byte[]) familyEntry.getValue();
               bigInt = new BigInteger(1, msgDigest.digest(value));
-              digest = bigInt.toString(16);
+              // digest = bigInt.toString(16);
               valueLength = value.length;
               
-              sb.append(Common.completionString("", 4));
-              sb.append(Common.completionString(family + ":" + qualify, ' ',
-                  64, false)
-                  + Common.completionString("", 4)
-                  + Common.completionString("" + valueLength, 10)
-                  + Common.completionString("", 4)
-                  + date
-                  + Common.completionString("", 4)
-                  + Common.completionString(digest, '0', 32, true));
-              sb.append(Constants.LINE_SEPARATOR);
+              srcRowMsg.appendRow(row);
+              srcRowMsg.appendCellMsg(family, qualify, timestamp, valueLength,
+                  bigInt);
+              
+              // sb.append(Common.completionString("", 4));
+              // sb.append(Common.completionString(family + ":" + qualify, ' ',
+              // 64, false)
+              // + Common.completionString("", 4)
+              // + Common.completionString("" + valueLength, 10)
+              // + Common.completionString("", 4)
+              // + date
+              // + Common.completionString("", 4)
+              // + Common.completionString(digest, '0', 32, true));
+              // sb.append(Constants.LINE_SEPARATOR);
               
               Personal personal = new Personal();
               try {
                 personal.parsePersonalData(row, family, qualify, value);
-                newSb.append(personal.getHbaseCell().getRowKey()
-                    + Constants.LINE_SEPARATOR);
-                newSb.append(Common.completionString("", 4));
-                newSb.append(Common.completionString(personal.getHbaseCell().getFamily() + ":"
-                    + personal.getHbaseCell().getQualify(), ' ', 64, false)
-                    + Common.completionString("", 4)
-                    + Common.completionString("" + valueLength, 10)
-                    + Common.completionString("", 4)                    
-                    + date
-                    + Common.completionString("", 4)
-                    + Common.completionString(digest, '0', 32, true));
-                newSb.append(Constants.LINE_SEPARATOR);
+                desRowMsg.appendRow(personal.getHbaseCell().getRowKey());
+                desRowMsg.appendCellMsg(personal.getHbaseCell().getFamily(),
+                    personal.getHbaseCell().getQualify(), timestamp,
+                    valueLength, bigInt);
+//                newSb.append(personal.getHbaseCell().getRowKey()
+//                    + Constants.LINE_SEPARATOR);
+//                newSb.append(Common.completionString("", 4));
+//                newSb.append(Common.completionString(personal.getHbaseCell()
+//                    .getFamily() + ":" + personal.getHbaseCell().getQualify(),
+//                    ' ', 64, false)
+//                    + Common.completionString("", 4)
+//                    + Common.completionString("" + valueLength, 10)
+//                    + Common.completionString("", 4)
+//                    + date
+//                    + Common.completionString("", 4)
+//                    + Common.completionString(digest, '0', 32, true));
+//                newSb.append(Constants.LINE_SEPARATOR);
               } catch (PersonalParseException e) {
                 LOG.warn("", e);
               }
             }
           }
-          sb.append(newSb + Constants.LINE_SEPARATOR);
+          sb.append(srcRowMsg.getMsg());
+          sb.append(desRowMsg.getMsg());
+          sb.append(Constants.LINE_SEPARATOR);
           printQueue.put(sb);
           count = totalCount.incrementAndGet();
           if (count % 1000 == 0) {
