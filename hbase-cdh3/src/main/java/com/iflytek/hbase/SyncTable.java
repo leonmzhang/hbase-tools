@@ -85,9 +85,11 @@ public class SyncTable implements Tool {
   
   public class Worker implements Runnable {
     private Configuration conf;
+    private Configuration srcConf;
     
     public Worker(Configuration conf, String key) {
       this.conf = new Configuration(conf);
+      this.srcConf = new Configuration(conf);
     }
     
     @Override
