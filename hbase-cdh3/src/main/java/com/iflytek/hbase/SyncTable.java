@@ -159,10 +159,13 @@ public class SyncTable implements Tool {
               sb.append(Constants.LINE_SEPARATOR);
             }
           }
+          printQueue.put(sb);
         }
       } catch (IOException e) {
         LOG.warn("", e);
       } catch (NoSuchAlgorithmException e) {
+        LOG.warn("", e);
+      } catch (InterruptedException e) {
         LOG.warn("", e);
       } finally {
         if (scanner != null) {
