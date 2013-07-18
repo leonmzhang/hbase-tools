@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -45,6 +46,8 @@ public class SyncTable implements Tool {
   private BlockingQueue<StringBuilder> printQueue;
   private boolean printSignal;
   
+  private AtomicInteger totalCount;
+  
   public SyncTable(Configuration conf) {
     this.conf = new Configuration(conf);
     this.srcConf = new Configuration(conf);
@@ -66,7 +69,7 @@ public class SyncTable implements Tool {
             if (sb == null) {
               continue;
             }
-            pw.write(sb.toString() + Constants.LINE_SEPARATOR);
+            pw.write(sb.toString());
             pw.flush();
           } catch (InterruptedException e) {
             LOG.warn("", e);
@@ -125,6 +128,8 @@ public class SyncTable implements Tool {
       String startRow = array[0];
       String endRow = array[1];
       
+      int count = 0;
+      
       try {
         msgDigest = MessageDigest.getInstance("MD5");
         scan.setTimeRange(minStamp, maxStamp);
@@ -168,6 +173,10 @@ public class SyncTable implements Tool {
             }
           }
           printQueue.put(sb);
+          count = totalCount.incrementAndGet();
+          if(count % 1000 == 0) {
+            LOG.info("Already scan: " + count);
+          }
         }
       } catch (IOException e) {
         LOG.warn("", e);
@@ -194,6 +203,7 @@ public class SyncTable implements Tool {
     cmdLine = Common.parseOptions(options, args);
     printQueue = new LinkedBlockingDeque<StringBuilder>();
     printSignal = true;
+    totalCount = new AtomicInteger();
   }
   
   private void cleanup() throws Exception {
@@ -245,6 +255,9 @@ public class SyncTable implements Tool {
     conf.addResource("hbase-tools.xml");
     
     SyncTable st = new SyncTable(conf);
+    long startTime = System.currentTimeMillis();
     ToolRunner.run(st, args);
+    long stopTime = System.currentTimeMillis();
+    LOG.info("Total time cost: " + (stopTime - startTime) + "ms");
   }
 }
