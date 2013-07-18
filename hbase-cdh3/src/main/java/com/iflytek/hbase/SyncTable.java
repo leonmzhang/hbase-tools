@@ -215,11 +215,16 @@ public class SyncTable implements Tool {
                     .getColumn()));
                 mutation.setValue(value);
                 mutations.add(mutation);
-                client.mutateRowTs(ByteBuffer.wrap(Bytes.toBytes(personal
-                    .getHbaseCell().getTable())), ByteBuffer.wrap(Bytes
-                    .toBytes(personal.getHbaseCell().getRowKey())), mutations,
-                    timestamp, attributes);
+                ByteBuffer newTableName = ByteBuffer.wrap(Bytes
+                    .toBytes(personal.getHbaseCell().getTable()));
+                ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(personal
+                    .getHbaseCell().getRowKey()));
+                
+                client.mutateRowTs(newTableName, newRow, mutations, timestamp,
+                    attributes);
               } catch (PersonalParseException e) {
+                LOG.warn("", e);
+              } catch (Exception e) {
                 LOG.warn("", e);
               }
             }
