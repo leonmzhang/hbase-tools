@@ -26,9 +26,11 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.ScannerTimeoutException;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.Last;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -163,6 +165,7 @@ public class SyncTable implements Tool {
       String[] array = key.split(";");
       String startRow = array[0];
       String endRow = array[1];
+      String scanLastRow = startRow;
       
       int count = 0;
       
@@ -178,12 +181,24 @@ public class SyncTable implements Tool {
         scan.setStopRow(Bytes.toBytes(endRow));
         scanner = table.getScanner(scan);
         
-        while ((result = scanner.next()) != null) {
+        do {
+          try {
+            result = scanner.next();
+            if(result == null) {
+              break;
+            }
+          } catch (ScannerTimeoutException e) {
+            scan.setStartRow(Bytes.toBytes(scanLastRow));
+            scanner = table.getScanner(scan);
+            continue;
+          }
+
           sb = new StringBuilder();
           srcRowMsg = new RowMessage();
           desRowMsg = new RowMessage();
           
           row = Bytes.toString(result.getRow());
+          scanLastRow = row;
           noVersionMap = result.getNoVersionMap();
           
           for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
@@ -238,6 +253,7 @@ public class SyncTable implements Tool {
               }
             }
           }
+          
           sb.append(srcRowMsg.getMsg());
           sb.append(desRowMsg.getMsg());
           sb.append(Constants.LINE_SEPARATOR);
@@ -246,7 +262,7 @@ public class SyncTable implements Tool {
           if (count % 1000 == 0) {
             LOG.info("Already scan: " + count);
           }
-        }
+        } while(result != null);
       } catch (Exception e) {
         LOG.warn("", e);
       } finally {

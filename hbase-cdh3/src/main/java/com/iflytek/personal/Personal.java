@@ -62,7 +62,7 @@ public class Personal {
     Map<String,String> kvMap = new HashMap<String,String>();
     
     if (qualify == null) {
-      throw new PersonalParseException();
+      throw new PersonalParseException("qualify: null");
     }
     
     String qualifyEx = qualify;
@@ -89,7 +89,7 @@ public class Personal {
       table = PersonalUtil.PERSONAL;
       prefix = pathArray[0];
       if (ROOT.equals(prefix)) {
-        throw new PersonalParseException();
+        throw new PersonalParseException("qualify: " + qualify);
       }
       type = fileNameArray[fileNameArray.length - 1];
       
