@@ -190,6 +190,7 @@ public class SyncTable implements Tool {
             LOG.warn("scanner timeout, get scanner from last row: "
                 + scanLastRow, e);
             scan.setStartRow(Bytes.toBytes(scanLastRow));
+            scanner.close();
             scanner = table.getScanner(scan);
             continue;
           }
