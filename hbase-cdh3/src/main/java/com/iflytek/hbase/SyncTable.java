@@ -46,7 +46,7 @@ import com.iflytek.personal.RowMessage;
 
 public class SyncTable implements Tool {
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
-  
+
   private ArrayList<String> thriftServers = new ArrayList<String>();
   
   private String getDesThriftServer() {
