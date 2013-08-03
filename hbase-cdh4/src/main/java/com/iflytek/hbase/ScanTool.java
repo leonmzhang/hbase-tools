@@ -8,10 +8,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.HTable;
@@ -21,11 +24,13 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class ScanTool {
+  private static final Log LOG = LogFactory.getLog(ScanTool.class);
   
   private Options options = new Options();
   private CommandLine cmdLine;
   
   private Configuration conf;
+  private AtomicInteger totalCount = new AtomicInteger(0);
   
   public ScanTool() throws Exception {
     options.addOption("n", "scan-number", true, "Number of scan count!");
@@ -124,6 +129,10 @@ public class ScanTool {
               + Common.completionString(digest, '0', 32, true));
           sb.append(Constants.LINE_SEPARATOR);
         }
+      }
+      int count = totalCount.incrementAndGet();
+      if (count % 1000 == 0) {
+        LOG.info("Already scan count: " + count);
       }
     }
     
