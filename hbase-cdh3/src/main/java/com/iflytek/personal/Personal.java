@@ -34,7 +34,7 @@ public class Personal {
       throw new PersonalParseException();
     }
     
-    String rowKey =cleanRowKey(oldRowKey); 
+    String rowKey = cleanRowKey(oldRowKey); 
 
     cell.setFamily("p");
     
@@ -102,5 +102,9 @@ public class Personal {
     kvMap.put(TYPE, type);
     kvMap.put(TABLE, table);
     return kvMap;
+  }
+  
+  public static void main(String[] args) {
+	  
   }
 }
