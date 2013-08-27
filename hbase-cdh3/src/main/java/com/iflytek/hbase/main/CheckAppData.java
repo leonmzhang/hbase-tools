@@ -92,7 +92,7 @@ public class CheckAppData {
     
   }
   
-  public int runTool(Configuration conf, String[] args) throws Exception {
+  public int runTool(Configuration conf, String[] args) {
     tablePool = new HTablePool(conf, 128);
     HTableInterface table = tablePool.getTable("personal");
     
@@ -100,31 +100,41 @@ public class CheckAppData {
     AppDataFilter filter = new AppDataFilter();
     scan.setFilter(filter);
     scan.addFamily(Bytes.toBytes("cf"));
-    ResultScanner scanner = table.getScanner(scan);
-    Result result = null;
-    String rowKey = null;
-    String scanLastRow = null;
     
-    do {
-      try {
-        result = scanner.next();
-        if (result == null) {
-          break;
+    ResultScanner scanner = null;
+    try {
+      scanner = table.getScanner(scan);
+      
+      Result result = null;
+      String rowKey = null;
+      String scanLastRow = null;
+      
+      do {
+        try {
+          result = scanner.next();
+          if (result == null) {
+            break;
+          }
+        } catch (ScannerTimeoutException e) {
+          LOG.warn(
+              "scanner timeout, get scanner from last row: " + scanLastRow, e);
+          scan.setStartRow(Bytes.toBytes(scanLastRow));
+          scanner.close();
+          scanner = table.getScanner(scan);
+          continue;
+        } catch (IOException e) {
+          LOG.warn("", e);
         }
-      } catch (ScannerTimeoutException e) {
-        LOG.warn("scanner timeout, get scanner from last row: " + scanLastRow,
-            e);
-        scan.setStartRow(Bytes.toBytes(scanLastRow));
-        scanner.close();
-        scanner = table.getScanner(scan);
-        continue;
-      }
-      
-      rowKey = Bytes.toString(result.getRow());
-      scanLastRow = rowKey;
-      LOG.info(rowKey);
-      
-    } while (result != null);
+        
+        rowKey = Bytes.toString(result.getRow());
+        scanLastRow = rowKey;
+        LOG.info(rowKey);
+        
+      } while (result != null);
+    } catch (IOException e) {
+      LOG.warn("", e);
+      return 0;
+    }
     
     return 0;
   }
