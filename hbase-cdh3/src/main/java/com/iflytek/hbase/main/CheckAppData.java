@@ -98,7 +98,8 @@ public class CheckAppData {
     Scan scan = new Scan();
     AppDataFilter filter = new AppDataFilter();
     scan.setFilter(filter);
-    ResultScanner scanner = table.getScanner(Bytes.toBytes("cf"));
+    scan.addFamily(Bytes.toBytes("cf"));
+    ResultScanner scanner = table.getScanner(scan);
     Result result = null;
     String rowKey = null;
     
