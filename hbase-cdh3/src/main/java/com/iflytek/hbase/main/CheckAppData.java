@@ -14,6 +14,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.ScannerTimeoutException;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -102,10 +103,25 @@ public class CheckAppData {
     ResultScanner scanner = table.getScanner(scan);
     Result result = null;
     String rowKey = null;
+    String scanLastRow = null;
     
     do {
-      result = scanner.next();
+      try {
+        result = scanner.next();
+        if (result == null) {
+          break;
+        }
+      } catch (ScannerTimeoutException e) {
+        LOG.warn("scanner timeout, get scanner from last row: " + scanLastRow,
+            e);
+        scan.setStartRow(Bytes.toBytes(scanLastRow));
+        scanner.close();
+        scanner = table.getScanner(scan);
+        continue;
+      }
+      
       rowKey = Bytes.toString(result.getRow());
+      scanLastRow = rowKey;
       LOG.info(rowKey);
       
     } while (result != null);
@@ -116,12 +132,16 @@ public class CheckAppData {
   /**
    * @param args
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     Common.globalInit();
     
     Configuration conf = new Configuration();
     conf.addResource("hbase-tools.xml");
     CheckAppData cad = new CheckAppData();
-    cad.runTool(conf, args);
+    try {
+      cad.runTool(conf, args);
+    } catch (Exception e) {
+      LOG.warn("", e);
+    }
   }
 }
