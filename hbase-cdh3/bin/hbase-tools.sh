@@ -29,6 +29,8 @@ elif [ "${COMMAND}" = "sync" ]; then
   CLASS="com.iflytek.hbase.SyncTable"
 elif [ "${COMMAND}" = "trans" ]; then
   CLASS="com.iflytek.hbase.TransTool"
+elif [ "${COMMAND}" = "app" ]; then
+  CLASS="com.iflytek.hbase.main.CheckAppData"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
