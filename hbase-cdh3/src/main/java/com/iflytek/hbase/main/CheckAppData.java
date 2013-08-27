@@ -106,6 +106,7 @@ public class CheckAppData {
     AppDataFilter filter = new AppDataFilter();
     // scan.setFilter(filter);
     scan.addFamily(Bytes.toBytes("cf"));
+    scan.setStartRow(Bytes.toBytes("aa1050"));
     
     ResultScanner scanner = null;
     try {
