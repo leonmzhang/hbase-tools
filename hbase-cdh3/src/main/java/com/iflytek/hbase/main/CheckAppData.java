@@ -125,15 +125,13 @@ public class CheckAppData {
           if (result == null) {
             break;
           }
-        } catch (ScannerTimeoutException e) {
+        } catch (Exception e) {
           LOG.warn(
               "scanner timeout, get scanner from last row: " + scanLastRow, e);
           scan.setStartRow(Bytes.toBytes(scanLastRow));
           scanner.close();
           scanner = table.getScanner(scan);
           continue;
-        } catch (IOException e) {
-          LOG.warn("", e);
         }
         
         rowKey = Bytes.toString(result.getRow());
