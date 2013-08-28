@@ -136,8 +136,7 @@ public class HdfsToHbase {
     mutations.add(mutation);
     ByteBuffer tableName = ByteBuffer.wrap(Bytes.toBytes(cell.getTable()));
     ByteBuffer rowKey = ByteBuffer.wrap(Bytes.toBytes(cell.getRowKey()));
-    ByteBuffer column = ByteBuffer.wrap(Bytes.toBytes(cell.getFamily() + ":"
-        + cell.getColumn()));
+    ByteBuffer column = ByteBuffer.wrap(Bytes.toBytes(cell.getColumn()));
     
     try {
       List<TCell> cellList = client.get(tableName, rowKey, column, attributes);
