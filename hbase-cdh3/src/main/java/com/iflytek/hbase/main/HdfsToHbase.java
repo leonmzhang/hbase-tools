@@ -142,12 +142,9 @@ public class HdfsToHbase {
     try {
       List<TCell> cellList = client.get(tableName, rowKey, column, attributes);
       if (cellList.isEmpty() || cellList.get(0).timestamp < cell.getTimestamp()) {
-        //client.mutateRowTs(tableName, rowKey, mutations, timestamp, attributes);
+        client.mutateRowTs(tableName, rowKey, mutations, timestamp, attributes);
         LOG.info("write to hbase");
       }
-      
-      // client.mutateRowTs(newTableName, newRow, mutations, timestamp,
-      // attributes);
     } catch (Exception e) {
       LOG.warn("", e);
     }
