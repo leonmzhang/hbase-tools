@@ -131,7 +131,7 @@ public class HdfsToHbase {
     
     mutations = new ArrayList<Mutation>();
     mutation = new Mutation();
-    mutation.setColumn(Bytes.toBytes(""));
+    mutation.setColumn(Bytes.toBytes(cell.getColumn()));
     mutation.setValue(cell.getValue());
     mutations.add(mutation);
     ByteBuffer tableName = ByteBuffer.wrap(Bytes.toBytes(cell.getTable()));
