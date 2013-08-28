@@ -38,7 +38,8 @@ public class HdfsToHbase {
     Common.globalInit();
     Configuration conf = new Configuration();
     conf.set("fs.default.name", "hdfs://namenode-gz.iflytek.com:9040");
-    
+    HdfsToHbase h2h = new HdfsToHbase();
+    h2h.runTool(conf, args);
   }
   
 }
