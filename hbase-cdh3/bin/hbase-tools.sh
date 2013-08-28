@@ -16,7 +16,9 @@ if [ $# = 0 ]; then
 fi
 
 CLASSPATH=${CLASSPATH}:${bin}/../hbase-tools-cdh3-0.1.0-SNAPSHOT-jar-with-dependencies.jar:${bin}/../conf
-JAVA=${JAVA_HOME}/bin/java
+uAVA=${JAVA_HOME}/bin/java
+
+JVM_OPTS=" -Xdebug -Xrunjdwp:transport=dt_socket,suspend=y,server=y,address=3389 "
 
 COMMAND=$1
 shift
