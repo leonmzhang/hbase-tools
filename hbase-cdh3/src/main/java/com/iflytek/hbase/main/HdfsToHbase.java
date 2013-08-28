@@ -1,6 +1,7 @@
 package com.iflytek.hbase.main;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,20 +16,29 @@ public class HdfsToHbase {
   private static final Log LOG = LogFactory.getLog(HdfsToHbase.class);
   
   public int runTool(Configuration conf, String[] args) {
+    Path pathApp = new Path("/msp/app");
+    Path pathGws = new Path("/msp_gws");
+    
+    ArrayList<Path> fileList = getFileList(conf, pathApp);
+    
+    return 0;
+  }
+  
+  private ArrayList<Path> getFileList(Configuration conf, Path dirPath) {
+    ArrayList<Path> fileList = new ArrayList<Path>();
     try {
       FileSystem fs = FileSystem.get(conf);
-      Path path_app = new Path("/msp/app");
-      Path path_gws = new Path("/msp_gws");
-      FileStatus[] statusArray = fs.listStatus(path_app);
-      for(FileStatus status : statusArray) {
-        LOG.info(status.getPath().getName());
+      
+      FileStatus[] statusArray = fs.listStatus(dirPath);
+      for (FileStatus status : statusArray) {
+        LOG.info(status.getPath().toString());
       }
       
     } catch (IOException e) {
       LOG.warn("", e);
     }
     
-    return 0;
+    return null;
   }
   
   /**
