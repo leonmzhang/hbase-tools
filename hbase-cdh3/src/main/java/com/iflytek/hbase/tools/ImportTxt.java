@@ -42,9 +42,11 @@ public class ImportTxt {
     
     TSocket socket = new TSocket(THRIFT_SERVER, 9090);
     socket.setTimeout(3000);
+    // TTransport transport = new TFramedTransport(socket);
     TTransport transport = new TFramedTransport(socket);
     TProtocol protocol = new TBinaryProtocol(transport);
     try {
+      socket.open();
       transport.open();
     } catch (TTransportException e1) {
       // TODO Auto-generated catch block
