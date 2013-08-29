@@ -18,6 +18,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.regionserver.NoSuchColumnFamilyException;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -106,7 +107,8 @@ public class CheckPersonalData {
       while ((result = scanner.next()) != null && tempCount-- > 0) {
         row = result.getRow();
         rowStr = Bytes.toString(row);
-        String newRowStr = rowStr.startsWith("aa") ? rowStr.substring(1) : rowStr;
+        String newRowStr = rowStr.startsWith("aa") ? rowStr.substring(1)
+            : rowStr;
         Map<byte[],byte[]> familyMap = result.getFamilyMap(Bytes.toBytes("cf"));
         for (Map.Entry<?,?> entry : familyMap.entrySet()) {
           String qualify = Bytes.toString((byte[]) entry.getKey());
@@ -117,11 +119,19 @@ public class CheckPersonalData {
           ByteBuffer newTableName = ByteBuffer.wrap(Bytes.toBytes("personal"));
           ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(rowStr
               .startsWith("aa") ? rowStr.substring(1) : rowStr));
-          List<TCell> cellList = client.get(newTableName, newRow, newColumn,
-              attributes);
-          if (cellList.isEmpty()) {
-            LOG.info("new hbase does not have this cell, row: " + parser.rowKey
-                + ", column: " + parser.column);
+          try {
+            List<TCell> cellList = client.get(newTableName, newRow, newColumn,
+                attributes);
+            if (cellList.isEmpty()) {
+              LOG.info("new hbase does not have this cell, row: "
+                  + parser.rowKey + ", column: " + parser.column);
+            }
+          } catch (Exception e) {
+            if(e instanceof NoSuchColumnFamilyException) {
+              LOG.info("qualify: " + qualify);
+              continue;
+            }
+            LOG.warn("", e);
           }
         }
       }
