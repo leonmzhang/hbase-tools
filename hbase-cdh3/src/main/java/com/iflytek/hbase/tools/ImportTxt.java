@@ -17,6 +17,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 
 import com.iflytek.hbase.thrift.generated.Hbase;
 import com.iflytek.hbase.thrift.generated.Mutation;
@@ -43,6 +44,14 @@ public class ImportTxt {
     socket.setTimeout(3000);
     TTransport transport = new TFramedTransport(socket);
     TProtocol protocol = new TBinaryProtocol(transport);
+    try {
+      transport.open();
+    } catch (TTransportException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+      return;
+    }
+    
     Hbase.Client client = new Hbase.Client(protocol);
     
     List<Mutation> mutations = null;
@@ -54,14 +63,13 @@ public class ImportTxt {
       Get get = null;
       Result result = null;
       Map<byte[],byte[]> familyMap = null;
-      transport.open();
       
       for (String uid : UID_ARRAY) {
         String oldUid = uid;
-        if(uid.startsWith("a")) {
+        if (uid.startsWith("a")) {
           oldUid = "a" + uid;
         }
-          
+        
         get = new Get(Bytes.toBytes(oldUid));
         get.addFamily(Bytes.toBytes("cf"));
         
