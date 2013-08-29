@@ -76,6 +76,8 @@ public class PersonalTrans {
     LOG.info("start");
     
     Configuration conf = new Configuration();
+    conf.addResource("hbase-tools.xml");
+    
     PersonalTrans pt = new PersonalTrans();
     pt.runTool(conf, args);
     
