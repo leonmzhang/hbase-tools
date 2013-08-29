@@ -33,7 +33,7 @@ public class PersonalTrans {
     HTableInterface table = tablePool.getTable("personal");
     
     Scan scan = new Scan();
-    scan.addFamily(Bytes.toBytes("p"));
+    scan.addFamily(Bytes.toBytes("cf"));
     ResultScanner scanner = null;
     Result result = null;
     byte[] row = null;
@@ -72,7 +72,7 @@ public class PersonalTrans {
     }
     baseDir = args[0];
     outputDir = baseDir + "/check_data/";
-    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
+    PropertyConfigurator.configure(baseDir + "/../conf/log4j.properties");
     LOG.info("start");
     
     Configuration conf = new Configuration();
