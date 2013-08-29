@@ -2,7 +2,6 @@ package com.iflytek.hbase.tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -107,12 +106,13 @@ public class CheckPersonalData {
       while ((result = scanner.next()) != null && tempCount-- > 0) {
         row = result.getRow();
         rowStr = Bytes.toString(row);
+        String newRowStr = rowStr.startsWith("aa") ? rowStr.substring(1) : rowStr;
         Map<byte[],byte[]> familyMap = result.getFamilyMap(Bytes.toBytes("cf"));
         for (Map.Entry<?,?> entry : familyMap.entrySet()) {
           String qualify = Bytes.toString((byte[]) entry.getKey());
           byte[] value = (byte[]) entry.getValue();
           PathParser parser = new PathParser();
-          parser.parsePartPath(qualify);
+          parser.parsePartPath(newRowStr, qualify);
           ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(parser.column));
           ByteBuffer newTableName = ByteBuffer.wrap(Bytes.toBytes("personal"));
           ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(rowStr
@@ -151,7 +151,7 @@ public class CheckPersonalData {
     
     LOG.info("start");
     Configuration conf = new Configuration();
-    //conf.addResource("hbase-tools.xml");
+    // conf.addResource("hbase-tools.xml");
     conf.set("hbase.zookeeper.quorum", "192.168.150.16,192.169.150.17,"
         + "192.168.150.18,192.168.150.19,192.168.150.20");
     
