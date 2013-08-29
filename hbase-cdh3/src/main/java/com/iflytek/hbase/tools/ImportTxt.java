@@ -51,7 +51,6 @@ public class ImportTxt {
     } catch (TTransportException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
-      return;
     }
     
     Hbase.Client client = new Hbase.Client(protocol);
