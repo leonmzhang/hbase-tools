@@ -72,6 +72,10 @@ public class PersonalTrans {
     }
     baseDir = System.getProperty("base.dir");
     outputDir = baseDir + "/check_data/";
+    File outputDirFile = new File(outputDir);
+    if(outputDirFile.exists()) {
+      outputDirFile.mkdirs();
+    }
     PropertyConfigurator.configure(baseDir + "/../conf/log4j.properties");
     LOG.info("start");
     
