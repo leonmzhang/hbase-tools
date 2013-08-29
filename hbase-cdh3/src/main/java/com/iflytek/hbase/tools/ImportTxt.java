@@ -44,7 +44,6 @@ public class ImportTxt {
     List<Mutation> mutations = null;
     Mutation mutation = null;
     Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
-    long timestamp = 0;
     
     try {
       HTable table = new HTable(conf, "personal");
@@ -75,7 +74,7 @@ public class ImportTxt {
             ByteBuffer tableName = ByteBuffer.wrap(Bytes.toBytes("personal_"));
             ByteBuffer rowKey = ByteBuffer.wrap(Bytes.toBytes(uid));
             ByteBuffer column = ByteBuffer
-                .wrap(Bytes.toBytes("cf:contact.txt"));
+                .wrap(Bytes.toBytes("p:contact.txt"));
             client.mutateRow(tableName, rowKey, mutations, attributes);
           }
         }
