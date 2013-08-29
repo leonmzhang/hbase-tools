@@ -12,4 +12,6 @@ if [ ${DEBUG_FLAG} = "debug" ]; then
   shift
 fi
 
+CLASS=com.iflytek.hbase.main.PersonalTrans
+
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} ${bin} $@ &
