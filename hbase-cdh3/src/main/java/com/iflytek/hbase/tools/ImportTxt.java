@@ -58,11 +58,14 @@ public class ImportTxt {
         get.addFamily(Bytes.toBytes("cf"));
         
         result = table.get(get);
+        System.out.println("get row:" + Bytes.toString(result.getRow()));
+        
         familyMap = result.getFamilyMap(Bytes.toBytes("cf"));
         
         for (Map.Entry<?,?> entry : familyMap.entrySet()) {
           String q = Bytes.toString((byte[]) entry.getKey());
           if (q.endsWith("txt")) {
+            System.out.println("get q:" + q);
             byte[] v = (byte[]) entry.getKey();
             mutations = new ArrayList<Mutation>();
             mutation = new Mutation();
