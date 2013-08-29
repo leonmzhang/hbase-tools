@@ -3,6 +3,8 @@
 bin=$(dirname $0)
 bin=$(cd $bin>/dev/null; pwd)
 
+JAVA=${JAVA_HOME}/bin/java
+
 SUSPEND=y
 
 JVM_OPTS=" -Dbase.dir=${bin}/../"
