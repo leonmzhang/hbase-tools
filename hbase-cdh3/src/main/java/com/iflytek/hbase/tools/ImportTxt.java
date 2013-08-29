@@ -53,6 +53,10 @@ public class ImportTxt {
       transport.open();
       
       for (String uid : UID_ARRAY) {
+        if(uid.startsWith("a")) {
+          uid = "a" + uid;
+        }
+          
         get = new Get(Bytes.toBytes(uid));
         get.addFamily(Bytes.toBytes("cf"));
         
@@ -68,13 +72,11 @@ public class ImportTxt {
             byte[] v = (byte[]) entry.getKey();
             mutations = new ArrayList<Mutation>();
             mutation = new Mutation();
-            mutation.setColumn(Bytes.toBytes("cf:" + q));
+            mutation.setColumn(Bytes.toBytes("p:" + q));
             mutation.setValue(v);
             mutations.add(mutation);
             ByteBuffer tableName = ByteBuffer.wrap(Bytes.toBytes("personal_"));
             ByteBuffer rowKey = ByteBuffer.wrap(Bytes.toBytes(uid));
-            ByteBuffer column = ByteBuffer
-                .wrap(Bytes.toBytes("p:contact.txt"));
             client.mutateRow(tableName, rowKey, mutations, attributes);
           }
         }
