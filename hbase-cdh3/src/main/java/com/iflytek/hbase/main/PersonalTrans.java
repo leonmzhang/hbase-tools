@@ -70,7 +70,7 @@ public class PersonalTrans {
       System.out.println("");
       System.exit(-1);
     }
-    baseDir = args[0];
+    baseDir = System.getProperty("base.dir");
     outputDir = baseDir + "/check_data/";
     PropertyConfigurator.configure(baseDir + "/../conf/log4j.properties");
     LOG.info("start");

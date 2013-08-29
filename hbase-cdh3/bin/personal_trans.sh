@@ -16,4 +16,4 @@ fi
 
 CLASS=com.iflytek.hbase.main.PersonalTrans
 
-${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} ${bin} $@ &
+${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@ &
