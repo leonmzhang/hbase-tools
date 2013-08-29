@@ -14,6 +14,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 
@@ -37,7 +38,10 @@ public class ImportTxt {
   public static void main(String[] args) {
     Configuration conf = new Configuration();
     conf.set("hbase.zookeeper.quorum", zkQuorum);
-    TTransport transport = new TSocket(THRIFT_SERVER, 9090);
+    
+    TSocket socket = new TSocket(THRIFT_SERVER, 9090);
+    socket.setTimeout(3000);
+    TTransport transport = new TFramedTransport(socket);
     TProtocol protocol = new TBinaryProtocol(transport);
     Hbase.Client client = new Hbase.Client(protocol);
     
@@ -53,11 +57,12 @@ public class ImportTxt {
       transport.open();
       
       for (String uid : UID_ARRAY) {
+        String oldUid = uid;
         if(uid.startsWith("a")) {
-          uid = "a" + uid;
+          oldUid = "a" + uid;
         }
           
-        get = new Get(Bytes.toBytes(uid));
+        get = new Get(Bytes.toBytes(oldUid));
         get.addFamily(Bytes.toBytes("cf"));
         
         result = table.get(get);
@@ -72,7 +77,7 @@ public class ImportTxt {
             byte[] v = (byte[]) entry.getKey();
             mutations = new ArrayList<Mutation>();
             mutation = new Mutation();
-            mutation.setColumn(Bytes.toBytes("p:" + q));
+            mutation.setColumn(Bytes.toBytes("p:contact.txt"));
             mutation.setValue(v);
             mutations.add(mutation);
             ByteBuffer tableName = ByteBuffer.wrap(Bytes.toBytes("personal_"));
