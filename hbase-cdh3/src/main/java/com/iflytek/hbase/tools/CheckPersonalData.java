@@ -147,7 +147,7 @@ public class CheckPersonalData {
     if (outputDirFile.exists()) {
       outputDirFile.mkdirs();
     }
-    PropertyConfigurator.configure(baseDir + "/../conf/log4j.properties");
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     LOG.info("start");
     Configuration conf = new Configuration();
