@@ -151,11 +151,12 @@ public class CheckPersonalData {
     
     LOG.info("start");
     Configuration conf = new Configuration();
-    conf.addResource("hbase-tools.xml");
+    //conf.addResource("hbase-tools.xml");
+    conf.set("hbase.zookeeper.quorum", "192.168.150.16,192.169.150.17,"
+        + "192.168.150.18,192.168.150.19,192.168.150.20");
     
     CheckPersonalData cpd = new CheckPersonalData();
     cpd.runTool(conf, args);
     LOG.info("stop");
   }
-  
 }
