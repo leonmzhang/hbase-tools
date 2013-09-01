@@ -291,7 +291,7 @@ public class SyncTable implements Tool {
             oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
                 Bytes.toBytes(oldQualify)).getTimestamp();
             value = (byte[]) entry.getValue();
-            LOG.info("get old personal cell, row: " + oldRowKey + ", column: "
+            LOG.info(firstSyncFlag ? "first sync, " : "" + "get old personal cell, row: " + oldRowKey + ", column: "
                 + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
                 + ", modify time: "
                 + Common.unixTimestampToDateStr(oldTimestamp));
@@ -319,7 +319,7 @@ public class SyncTable implements Tool {
                   newColumnByte, attributes);
               if (cellList.isEmpty()
                   || cellList.get(0).timestamp < oldTimestamp) {
-                LOG.info("sync cell, table: " + newTable + ", row: "
+                LOG.info(firstSyncFlag ? "first sync, " : "" + "sync cell, table: " + newTable + ", row: "
                     + newRowKey + ", column: " + newColumn + ", modify time: "
                     + Common.unixTimestampToDateStr(oldTimestamp));
                 client.mutateRowTs(newTableByte, newRowByte, mutations,
