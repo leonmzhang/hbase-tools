@@ -55,7 +55,7 @@ public class SyncTable implements Tool {
    * here for fast implement
    */
   private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
-      + "192.192.168.150.18,192.168.150.19,192.168.150.20";
+      + "192.168.150.18,192.168.150.19,192.168.150.20";
   private static final String THRIFT_SERVERS = "192.168.150.22,"
       + "192.168.150.23,192.168.150.24,192.168.150.25";
   
@@ -119,7 +119,7 @@ public class SyncTable implements Tool {
       long endTimestamp = System.currentTimeMillis();
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       LOG.info("Sync task " + this.taskId + " which start at "
-          + sdf.format(taskStartTime) + "is done, total cost: "
+          + sdf.format(taskStartTime) + " is done, total cost: "
           + (endTimestamp - startTimestamp) + ".");
     }
   }
