@@ -107,7 +107,7 @@ public class SyncTable implements Tool {
       
       ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
       for (int i = 0; i < WORKER_COUNT; i++) {
-        LOG.info("start scan worker for key: " + PersonalUtil.KEY[i]);
+        LOG.info("start timer sync scan worker for row range: " + PersonalUtil.KEY[i]);
         exec.execute(new Worker(PersonalUtil.KEY[i]));
       }
       exec.shutdown();
@@ -193,7 +193,7 @@ public class SyncTable implements Tool {
       this.endRow = array[1];
     }
     
-    private void setup() throws TTransportException {
+    private void setup() throws Exception {
       String host = getDesThriftServer();
       int port = 9090;
       transport = new TSocket(host, port);
@@ -202,12 +202,19 @@ public class SyncTable implements Tool {
       transport.open();
       
       table = tablePool.getTable(PersonalUtil.OLD_PERSONAL_TABLE);
+      if(table == null) {
+        String msg = "get HTable instance failed!";
+        LOG.warn(msg);
+        throw new Exception(msg);
+      }
     }
     
     private void cleanup() {
       try {
         transport.close();
-        table.close();
+        if(table != null) {
+          table.close();
+        }
       } catch (IOException e) {
         LOG.warn("worker cleanup failed", e);
       }
@@ -384,6 +391,7 @@ public class SyncTable implements Tool {
      */
     ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
     for (int i = 0; i < WORKER_COUNT; i++) {
+      LOG.info("start first sync scan worker for row range: " + PersonalUtil.KEY[i]);
       exec.execute(new Worker(PersonalUtil.KEY[i]));
     }
     exec.shutdown();
