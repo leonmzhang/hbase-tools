@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.client.ScannerTimeoutException;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -49,14 +50,24 @@ import com.iflytek.personal.PersonalUtil;
 import com.iflytek.personal.RowMessage;
 
 public class SyncTable implements Tool {
+  /* *
+   * these configurations should be in configuration file, but now I put them
+   * here for fast implement
+   */
+  private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
+      + "192.192.168.150.18,192.168.150.19,192.168.150.20";
+  private static final String THRIFT_SERVERS = "192.168.150.22,"
+      + "192.168.150.23,192.168.150.24,192.168.150.25";
+  
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
-  
-  /* the interval of sync task */
+  /* the interval of sync task, 30 minute */
   private static final long SYNC_INTERVAL = 30 * 60 * 1000;
-  
+  /* the scan interval, check changes for 40 minute before */
+  private static final long SCAN_INTERVAL = 40 * 60 * 1000;
   /* scan threads per task */
   private static final int WORKER_COUNT = PersonalUtil.KEY.length;
-  
+  /* the base dir defined by base.dir property */
+  public static String baseDir = "";
   /* an incremental id */
   private AtomicInteger taskID = new AtomicInteger(0);
   
@@ -93,17 +104,16 @@ public class SyncTable implements Tool {
       long startTimestamp = System.currentTimeMillis();
       
       ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
-      for(int i = 0; i < WORKER_COUNT; i++ ) {
+      for (int i = 0; i < WORKER_COUNT; i++) {
         LOG.info("start scan worker for key: " + PersonalUtil.KEY[i]);
         exec.execute(new Worker(PersonalUtil.KEY[i]));
       }
       exec.shutdown();
       
-      while(!exec.isTerminated()) {
+      while (!exec.isTerminated()) {
         try {
           Thread.sleep(500);
-        } catch (InterruptedException e) {
-        }
+        } catch (InterruptedException e) {}
       }
       
       long endTimestamp = System.currentTimeMillis();
@@ -147,14 +157,23 @@ public class SyncTable implements Tool {
   }
   
   public class Worker implements Runnable {
-    private String key;
+    private String rowRange;
     private TTransport transport;
     private TProtocol protocol;
     private Hbase.Client client;
     private HTableInterface table;
     
-    public Worker(String key) {
-      this.key = key;
+    private String startRow;
+    private String endRow;
+    
+    public Worker(String rowRange) {
+      this.rowRange = rowRange;
+    }
+    
+    private void parseRowRange() {
+      String[] array = rowRange.split(";");
+      this.startRow = array[0];
+      this.endRow = array[1];
     }
     
     private void setup() throws TTransportException {
@@ -165,33 +184,21 @@ public class SyncTable implements Tool {
       client = new Hbase.Client(protocol);
       transport.open();
       
-      table = tablePool.getTable("personal");
+      table = tablePool.getTable(PersonalUtil.OLD_PERSONAL_TABLE);
     }
     
     private void cleanup() {
-      transport.close();
       try {
+        transport.close();
         table.close();
       } catch (IOException e) {
-        LOG.warn("", e);
+        LOG.warn("worker cleanup failed", e);
       }
     }
     
-    @Override
-    public void run() {
-      try {
-        setup();
-      } catch (TTransportException e) {
-        LOG.warn("", e);
-        cleanup();
-        return;
-      }
+    private void doWork() {
+      parseRowRange();
       
-      Scan scan = new Scan();
-      String minDateStr = conf.get(Constants.SCAN_MIN_DATE);
-      String maxDateStr = conf.get(Constants.SCAN_MAX_DATE);
-      long minStamp = Common.dateStrToUnixTimestamp(minDateStr);
-      long maxStamp = Common.dateStrToUnixTimestamp(maxDateStr);
       ResultScanner scanner = null;
       Result result = null;
       StringBuilder sb = null;
@@ -200,6 +207,8 @@ public class SyncTable implements Tool {
       
       NavigableMap<byte[],NavigableMap<byte[],byte[]>> noVersionMap = null;
       NavigableMap<?,?> familyMap = null;
+      
+      String lastScanRow = startRow;
       
       String row = null;
       String family = null;
@@ -210,20 +219,20 @@ public class SyncTable implements Tool {
       MessageDigest msgDigest = null;
       int valueLength = 0;
       
-      String[] array = key.split(";");
-      String startRow = array[0];
-      String endRow = array[1];
-      String scanLastRow = startRow;
-      
       int count = 0;
       
       Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
       Mutation mutation = null;
       List<Mutation> mutations = null;
       
+      long currentTimestamp = System.currentTimeMillis();
+      
+      Scan scan = new Scan();
+      
       try {
         msgDigest = MessageDigest.getInstance("MD5");
-        scan.setTimeRange(minStamp, maxStamp);
+        
+        scan.setTimeRange(currentTimestamp - SCAN_INTERVAL, currentTimestamp);
         scan.addFamily(Bytes.toBytes("cf"));
         scan.setStartRow(Bytes.toBytes(startRow));
         scan.setStopRow(Bytes.toBytes(endRow));
@@ -237,8 +246,8 @@ public class SyncTable implements Tool {
             }
           } catch (ScannerTimeoutException e) {
             LOG.warn("scanner timeout, get scanner from last row: "
-                + scanLastRow, e);
-            scan.setStartRow(Bytes.toBytes(scanLastRow));
+                + lastScanRow, e);
+            scan.setStartRow(Bytes.toBytes(lastScanRow));
             scanner.close();
             scanner = table.getScanner(scan);
             continue;
@@ -249,7 +258,7 @@ public class SyncTable implements Tool {
           desRowMsg = new RowMessage();
           
           row = Bytes.toString(result.getRow());
-          scanLastRow = row;
+          lastScanRow = row;
           noVersionMap = result.getNoVersionMap();
           
           for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
@@ -323,17 +332,30 @@ public class SyncTable implements Tool {
       }
       cleanup();
     }
+    
+    @Override
+    public void run() {
+      try {
+        setup();
+        doWork();
+      } catch (TTransportException e) {
+        LOG.error("worker setup failed", e);
+        return;
+      } finally {
+        cleanup();
+      }
+    }
   }
   
   private void setup(String[] args) throws Exception {
-    conf.set(Constants.HBASE_ZOOKEEPER_QUORUM,
-        conf.get(Constants.SRC_HBASE_ZOOKEEPER_QUORUM));
+    conf.set(Constants.HBASE_ZOOKEEPER_QUORUM, ZK_QUORUM);
     tablePool = new HTablePool(conf, 1024);
     printQueue = new LinkedBlockingDeque<StringBuilder>();
     printSignal = true;
     totalCount = new AtomicInteger();
     
-    String thriftServerStr = conf.get(Constants.DES_HBASE_THRIFT_SERVERS);
+    //String thriftServerStr = conf.get(Constants.DES_HBASE_THRIFT_SERVERS);
+    String thriftServerStr = THRIFT_SERVERS;
     String[] thriftServerArray = thriftServerStr.split(",");
     for (String server : thriftServerArray) {
       thriftServers.add(server);
@@ -358,17 +380,16 @@ public class SyncTable implements Tool {
   
   @Override
   public int run(String[] args) throws Exception {
+    setup(args);
+    
     /**
      * 启动timer
      */
     syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
-    // TODO! this place will return
+    cleanup();
+    return 0;
     
-    setup(args);
-    
-    
-    
-    ExecutorService printExec = Executors.newSingleThreadExecutor();
+    /* ExecutorService printExec = Executors.newSingleThreadExecutor();
     printExec.execute(new Printer());
     printExec.shutdown();
     
@@ -381,25 +402,21 @@ public class SyncTable implements Tool {
     while (!exec.isTerminated()) {
       Thread.sleep(500);
     }
-    printSignal = false;
-    
-    cleanup();
-    return 0;
+    printSignal = false; */
   }
   
   /**
    * @param args
    */
   public static void main(String[] args) throws Exception {
-    Common.globalInit();
+    //Common.globalInit();
+    baseDir = System.getProperty("base.dir");
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     Configuration conf = new Configuration();
-    conf.addResource("hbase-tools.xml");
+    //conf.addResource("hbase-tools.xml");
     
     SyncTable st = new SyncTable(conf);
-    long startTime = System.currentTimeMillis();
     ToolRunner.run(st, args);
-    long stopTime = System.currentTimeMillis();
-    LOG.info("Total time cost: " + (stopTime - startTime) + "ms");
   }
 }

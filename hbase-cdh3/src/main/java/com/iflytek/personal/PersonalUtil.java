@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PersonalUtil {
+  public static final String OLD_PERSONAL_TABLE = "personal";
+  
   public static final String PERSONAL = "personal";
   public static final String PERSONAL_IRF = "personal_irf";
   public static final String PERSONAL_WAV = "personal_wav";
