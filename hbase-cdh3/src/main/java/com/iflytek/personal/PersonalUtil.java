@@ -3,6 +3,8 @@ package com.iflytek.personal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.hbase.util.Bytes;
+
 public class PersonalUtil {
   public static final String OLD_PERSONAL_TABLE = "personal";
   
@@ -10,6 +12,11 @@ public class PersonalUtil {
   public static final String PERSONAL_IRF = "personal_irf";
   public static final String PERSONAL_WAV = "personal_wav";
   public static final String PERSONAL_OTHER = "personal_other";
+  
+  public static final String OLD_FAMILY_STR = "cf";
+  public static final byte[] OLD_FAMILY_BYTE = Bytes.toBytes(OLD_FAMILY_STR);
+  public static final String NEW_FAMILY_STR = "p";
+  public static final byte[] NEW_FAMILY_BYTE = Bytes.toBytes(NEW_FAMILY_STR);
   
 //  public static final String PERSONAL = "personal_";
 //  public static final String PERSONAL_IRF = "personal_irf_";

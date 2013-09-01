@@ -184,7 +184,7 @@ public class SyncTable implements Tool {
       this.rowRange = rowRange;
       firstSyncFlag = false;
       startTime = System.currentTimeMillis() - SCAN_INTERVAL;
-      endTime = System.currentTimeMillis();      
+      endTime = System.currentTimeMillis();
     }
     
     private void parseRowRange() {
@@ -216,7 +216,6 @@ public class SyncTable implements Tool {
     private void doWork() {
       parseRowRange();
       
-      ResultScanner scanner = null;
       Result result = null;
       StringBuilder sb = null;
       RowMessage srcRowMsg = null;
@@ -227,30 +226,32 @@ public class SyncTable implements Tool {
       
       String lastScanRow = startRow;
       
-      String row = null;
-      String family = null;
-      String qualify = null;
-      long timestamp = 0;
+      /* these var is old cell info */
+      String oldRowKey = null;
+      String oldQualify = null;
+      long oldTimestamp = 0;
       byte[] value;
+      
       BigInteger bigInt = null;
       MessageDigest msgDigest = null;
       int valueLength = 0;
       
       int count = 0;
       
+      /* use for new personal table */
       Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
+      List<Mutation> mutations = new ArrayList<Mutation>();
       Mutation mutation = null;
-      List<Mutation> mutations = null;
       
-      long currentTimestamp = System.currentTimeMillis();
-      
+      /* use to scan old personal table */
+      ResultScanner scanner = null;
       Scan scan = new Scan();
       
       try {
         msgDigest = MessageDigest.getInstance("MD5");
         
-        scan.setTimeRange(currentTimestamp - SCAN_INTERVAL, currentTimestamp);
-        scan.addFamily(Bytes.toBytes("cf"));
+        scan.setTimeRange(startTime, endTime);
+        scan.addFamily(PersonalUtil.OLD_FAMILY_BYTE);
         scan.setStartRow(Bytes.toBytes(startRow));
         scan.setStopRow(Bytes.toBytes(endRow));
         scanner = table.getScanner(scan);
@@ -274,62 +275,97 @@ public class SyncTable implements Tool {
           srcRowMsg = new RowMessage();
           desRowMsg = new RowMessage();
           
-          row = Bytes.toString(result.getRow());
-          lastScanRow = row;
+          oldRowKey = Bytes.toString(result.getRow());
+          lastScanRow = oldRowKey;
           noVersionMap = result.getNoVersionMap();
+          familyMap = result.getFamilyMap(PersonalUtil.OLD_FAMILY_BYTE);
           
-          for (Map.Entry<?,?> entry : noVersionMap.entrySet()) {
-            family = Bytes.toString((byte[]) entry.getKey());
-            familyMap = (NavigableMap<?,?>) entry.getValue();
-            for (Map.Entry<?,?> familyEntry : familyMap.entrySet()) {
-              qualify = Bytes.toString((byte[]) familyEntry.getKey());
-              timestamp = result.getColumnLatest(Bytes.toBytes(family),
-                  Bytes.toBytes(qualify)).getTimestamp();
-              value = (byte[]) familyEntry.getValue();
-              bigInt = new BigInteger(1, msgDigest.digest(value));
-              valueLength = value.length;
+          for (Map.Entry<?,?> entry : familyMap.entrySet()) {
+            oldQualify = Bytes.toString((byte[]) entry.getKey());
+            oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
+                Bytes.toBytes(oldQualify)).getTimestamp();
+            value = (byte[]) entry.getValue();
+            LOG.info("get old personal cell, row: " + oldRowKey + ", column: "
+                + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
+                + ", modify time: " + Common.unixTimestampToDateStr(oldTimestamp));
+            
+            Personal personal = new Personal();
+            try {
+              personal.parsePersonalData(oldRowKey,
+                  PersonalUtil.OLD_FAMILY_STR, oldQualify, value);
+              desRowMsg.appendRow(personal.getHbaseCell().getRowKey());
+              desRowMsg.appendCellMsg(personal.getHbaseCell().getFamily(),
+                  personal.getHbaseCell().getQualify(), oldTimestamp,
+                  valueLength, bigInt);
               
-              srcRowMsg.appendRow(row);
-              srcRowMsg.appendCellMsg(family, qualify, timestamp, valueLength,
-                  bigInt);
-              
-              // new peronsal data format
-              Personal personal = new Personal();
-              try {
-                personal.parsePersonalData(row, family, qualify, value);
-                desRowMsg.appendRow(personal.getHbaseCell().getRowKey());
-                desRowMsg.appendCellMsg(personal.getHbaseCell().getFamily(),
-                    personal.getHbaseCell().getQualify(), timestamp,
-                    valueLength, bigInt);
-                
-                mutations = new ArrayList<Mutation>();
-                mutation = new Mutation();
-                mutation.setColumn(Bytes.toBytes(personal.getHbaseCell()
-                    .getColumn()));
-                mutation.setValue(value);
-                mutations.add(mutation);
-                ByteBuffer newTableName = ByteBuffer.wrap(Bytes
-                    .toBytes(personal.getHbaseCell().getTable()));
-                ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(personal
-                    .getHbaseCell().getRowKey()));
-                ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(personal
-                    .getHbaseCell().getColumn()));
-                List<TCell> cellList = client.get(newTableName, newRow,
-                    newColumn, attributes);
-                if (cellList.isEmpty()) {
-                  client.mutateRowTs(newTableName, newRow, mutations,
-                      timestamp, attributes);
-                } else if (cellList.get(0).timestamp < timestamp) {
-                  client.mutateRowTs(newTableName, newRow, mutations,
-                      timestamp, attributes);
-                }
-              } catch (PersonalParseException e) {
-                LOG.warn("", e);
-              } catch (Exception e) {
-                LOG.warn("", e);
+              mutations.clear();
+              mutation = new Mutation();
+              mutation.setColumn(Bytes.toBytes(personal.getHbaseCell()
+                  .getColumn()));
+              mutation.setValue(value);
+              mutations.add(mutation);
+              ByteBuffer newTableName = ByteBuffer.wrap(Bytes.toBytes(personal
+                  .getHbaseCell().getTable()));
+              ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(personal
+                  .getHbaseCell().getRowKey()));
+              ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(personal
+                  .getHbaseCell().getColumn()));
+              List<TCell> cellList = client.get(newTableName, newRow,
+                  newColumn, attributes);
+              if (cellList.isEmpty()) {
+                client.mutateRowTs(newTableName, newRow, mutations,
+                    oldTimestamp, attributes);
+              } else if (cellList.get(0).timestamp < oldTimestamp) {
+                client.mutateRowTs(newTableName, newRow, mutations,
+                    oldTimestamp, attributes);
               }
+            } catch (PersonalParseException e) {
+              LOG.warn("", e);
+            } catch (Exception e) {
+              LOG.warn("", e);
             }
           }
+          
+          /* check every column of current row , will delete */
+          /*
+           * for (Map.Entry<?,?> entry : noVersionMap.entrySet()) { // family =
+           * Bytes.toString((byte[]) entry.getKey()); familyMap =
+           * (NavigableMap<?,?>) entry.getValue(); for (Map.Entry<?,?>
+           * familyEntry : familyMap.entrySet()) { oldQualify =
+           * Bytes.toString((byte[]) familyEntry.getKey()); oldTimestamp =
+           * result.getColumnLatest( PersonalUtil.OLD_FAMILY_BYTE,
+           * Bytes.toBytes(oldQualify)) .getTimestamp(); value = (byte[])
+           * familyEntry.getValue(); bigInt = new BigInteger(1,
+           * msgDigest.digest(value)); valueLength = value.length;
+           * 
+           * srcRowMsg.appendRow(oldRowKey); // srcRowMsg.appendCellMsg(family,
+           * qualify, timestamp, // valueLength, // bigInt);
+           * 
+           * // new peronsal data format Personal personal = new Personal(); try
+           * { personal.parsePersonalData(oldRowKey,
+           * PersonalUtil.OLD_FAMILY_STR, oldQualify, value);
+           * desRowMsg.appendRow(personal.getHbaseCell().getRowKey());
+           * desRowMsg.appendCellMsg(personal.getHbaseCell().getFamily(),
+           * personal.getHbaseCell().getQualify(), oldTimestamp, valueLength,
+           * bigInt);
+           * 
+           * mutations = new ArrayList<Mutation>(); mutation = new Mutation();
+           * mutation.setColumn(Bytes.toBytes(personal.getHbaseCell()
+           * .getColumn())); mutation.setValue(value); mutations.add(mutation);
+           * ByteBuffer newTableName = ByteBuffer.wrap(Bytes
+           * .toBytes(personal.getHbaseCell().getTable())); ByteBuffer newRow =
+           * ByteBuffer.wrap(Bytes.toBytes(personal
+           * .getHbaseCell().getRowKey())); ByteBuffer newColumn =
+           * ByteBuffer.wrap(Bytes.toBytes(personal
+           * .getHbaseCell().getColumn())); List<TCell> cellList =
+           * client.get(newTableName, newRow, newColumn, attributes); if
+           * (cellList.isEmpty()) { client.mutateRowTs(newTableName, newRow,
+           * mutations, oldTimestamp, attributes); } else if
+           * (cellList.get(0).timestamp < oldTimestamp) {
+           * client.mutateRowTs(newTableName, newRow, mutations, oldTimestamp,
+           * attributes); } } catch (PersonalParseException e) { LOG.warn("",
+           * e); } catch (Exception e) { LOG.warn("", e); } } }
+           */
           
           sb.append(srcRowMsg.getMsg());
           sb.append(desRowMsg.getMsg());
@@ -371,7 +407,7 @@ public class SyncTable implements Tool {
     printSignal = true;
     totalCount = new AtomicInteger();
     
-    //String thriftServerStr = conf.get(Constants.DES_HBASE_THRIFT_SERVERS);
+    // String thriftServerStr = conf.get(Constants.DES_HBASE_THRIFT_SERVERS);
     String thriftServerStr = THRIFT_SERVERS;
     String[] thriftServerArray = thriftServerStr.split(",");
     for (String server : thriftServerArray) {
@@ -399,17 +435,18 @@ public class SyncTable implements Tool {
   public int run(String[] args) throws Exception {
     setup(args);
     
-    /** 
-     * start the first sync workers from 2012-01-01 00:00:00(timestamp: 1325347200000).
+    /**
+     * start the first sync workers from 2012-01-01 00:00:00(timestamp:
+     * 1325347200000).
      */
     ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
-    for(int i = 0; i < WORKER_COUNT; i++) {
+    for (int i = 0; i < WORKER_COUNT; i++) {
       exec.execute(new Worker(PersonalUtil.KEY[i]));
     }
     exec.shutdown();
     
     /**
-     * start timer, sync table ever 30 minutes for last 40 minutes chenages. 
+     * start timer, sync table ever 30 minutes for last 40 minutes chenages.
      */
     syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
     cleanup();
@@ -420,12 +457,12 @@ public class SyncTable implements Tool {
    * @param args
    */
   public static void main(String[] args) throws Exception {
-    //Common.globalInit();
+    // Common.globalInit();
     baseDir = System.getProperty("base.dir");
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     Configuration conf = new Configuration();
-    //conf.addResource("hbase-tools.xml");
+    // conf.addResource("hbase-tools.xml");
     
     SyncTable st = new SyncTable(conf);
     ToolRunner.run(st, args);

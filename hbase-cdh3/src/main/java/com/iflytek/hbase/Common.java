@@ -59,7 +59,9 @@ public class Common {
   }
   
   public static String unixTimestampToDateStr(long timestamp) {
-    return null;
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    Date date = new Date(timestamp);
+    return sdf.format(date);
   }
   
   public static long dateStrToUnixTimestamp(String dateStr) {
