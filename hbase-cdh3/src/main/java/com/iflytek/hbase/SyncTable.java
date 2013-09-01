@@ -409,7 +409,7 @@ public class SyncTable implements Tool {
     /**
      * start timer, sync table ever 30 minutes for last 40 minutes chenages.
      */
-    //syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
+    syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
     cleanup();
     return 0;
   }
