@@ -107,7 +107,8 @@ public class SyncTable implements Tool {
       
       ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
       for (int i = 0; i < WORKER_COUNT; i++) {
-        LOG.info("start timer sync scan worker for row range: " + PersonalUtil.KEY[i]);
+        LOG.info("start timer sync scan worker for row range: "
+            + PersonalUtil.KEY[i]);
         exec.execute(new Worker(PersonalUtil.KEY[i]));
       }
       exec.shutdown();
@@ -202,7 +203,7 @@ public class SyncTable implements Tool {
       transport.open();
       
       table = tablePool.getTable(PersonalUtil.OLD_PERSONAL_TABLE);
-      if(table == null) {
+      if (table == null) {
         String msg = "get HTable instance failed!";
         LOG.warn(msg);
         throw new Exception(msg);
@@ -212,7 +213,7 @@ public class SyncTable implements Tool {
     private void cleanup() {
       try {
         transport.close();
-        if(table != null) {
+        if (table != null) {
           table.close();
         }
       } catch (IOException e) {
@@ -223,16 +224,7 @@ public class SyncTable implements Tool {
     private void doWork() {
       parseRowRange();
       
-      NavigableMap<byte[],NavigableMap<byte[],byte[]>> noVersionMap = null;
-      NavigableMap<?,?> familyMap = null;
-      
       String lastScanRow = startRow;
-      
-      /* these var is old cell info */
-      String oldRowKey = null;
-      String oldQualify = null;
-      long oldTimestamp = 0;
-      byte[] value;
       
       BigInteger bigInt = null;
       MessageDigest msgDigest = null;
@@ -249,6 +241,21 @@ public class SyncTable implements Tool {
       ResultScanner scanner = null;
       Scan scan = new Scan();
       Result result = null;
+      NavigableMap<?,?> familyMap = null;
+      
+      /* these var is old cell info */
+      String oldRowKey = null;
+      String oldQualify = null;
+      long oldTimestamp = 0;
+      byte[] value;
+      
+      /* */
+      String newTable = null;
+      String newRowKey = null;
+      String newColumn = null;
+      ByteBuffer newTableByte = null;
+      ByteBuffer newRowByte = null;
+      ByteBuffer newColumnByte = null;
       
       try {
         msgDigest = MessageDigest.getInstance("MD5");
@@ -276,7 +283,6 @@ public class SyncTable implements Tool {
           
           oldRowKey = Bytes.toString(result.getRow());
           lastScanRow = oldRowKey;
-          noVersionMap = result.getNoVersionMap();
           familyMap = result.getFamilyMap(PersonalUtil.OLD_FAMILY_BYTE);
           
           for (Map.Entry<?,?> entry : familyMap.entrySet()) {
@@ -293,6 +299,9 @@ public class SyncTable implements Tool {
             try {
               personal.parsePersonalData(oldRowKey,
                   PersonalUtil.OLD_FAMILY_STR, oldQualify, value);
+              newTable = personal.getHbaseCell().getTable();
+              newRowKey = personal.getHbaseCell().getRowKey();
+              newColumn = personal.getHbaseCell().getColumn();
               
               mutations.clear();
               mutation = new Mutation();
@@ -300,19 +309,18 @@ public class SyncTable implements Tool {
                   .getColumn()));
               mutation.setValue(value);
               mutations.add(mutation);
-              ByteBuffer newTableName = ByteBuffer.wrap(Bytes.toBytes(personal
-                  .getHbaseCell().getTable()));
-              ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(personal
-                  .getHbaseCell().getRowKey()));
-              ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(personal
-                  .getHbaseCell().getColumn()));
-              List<TCell> cellList = client.get(newTableName, newRow,
-                  newColumn, attributes);
-              if (cellList.isEmpty()) {
-                client.mutateRowTs(newTableName, newRow, mutations,
-                    oldTimestamp, attributes);
-              } else if (cellList.get(0).timestamp < oldTimestamp) {
-                client.mutateRowTs(newTableName, newRow, mutations,
+              
+              newTableByte = ByteBuffer.wrap(Bytes.toBytes(newTable));
+              newRowByte = ByteBuffer.wrap(Bytes.toBytes(newRowKey));
+              newColumnByte = ByteBuffer.wrap(Bytes.toBytes(newColumn));
+              
+              List<TCell> cellList = client.get(newTableByte, newRowByte,
+                  newColumnByte, attributes);
+              if (cellList.isEmpty()
+                  || cellList.get(0).timestamp < oldTimestamp) {
+                LOG.info("sync cell, table: " + newTable + ", row: "
+                    + newRowKey + ", column: " + newColumn);
+                client.mutateRowTs(newTableByte, newRowByte, mutations,
                     oldTimestamp, attributes);
               }
             } catch (PersonalParseException e) {
@@ -321,7 +329,7 @@ public class SyncTable implements Tool {
               LOG.warn("", e);
             }
           }
-           
+          
           count = totalCount.incrementAndGet();
           if (count % 1000 == 0) {
             LOG.info("Already scan: " + count);
@@ -386,12 +394,13 @@ public class SyncTable implements Tool {
     setup(args);
     
     /**
-     * start the first sync workers from 2012-01-01 00:00:00(timestamp:
+     * start the first sync workers from 2012-01-01 00:00:00 (timestamp:
      * 1325347200000).
      */
     ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
     for (int i = 0; i < WORKER_COUNT; i++) {
-      LOG.info("start first sync scan worker for row range: " + PersonalUtil.KEY[i]);
+      LOG.info("start first sync scan worker for row range: "
+          + PersonalUtil.KEY[i]);
       exec.execute(new Worker(PersonalUtil.KEY[i]));
     }
     exec.shutdown();
