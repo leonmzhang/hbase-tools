@@ -401,7 +401,7 @@ public class SyncTable implements Tool {
     for (int i = 0; i < WORKER_COUNT; i++) {
       LOG.info("start first sync scan worker for row range: "
           + PersonalUtil.KEY[i]);
-      exec.execute(new Worker(PersonalUtil.KEY[i], true));
+      exec.execute(new Worker(PersonalUtil.KEY[i],  true));
     }
     exec.shutdown();
     
