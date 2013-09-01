@@ -66,6 +66,8 @@ public class SyncTable implements Tool {
   private static final long SCAN_INTERVAL = 40 * 60 * 1000;
   /* scan threads per task */
   private static final int WORKER_COUNT = PersonalUtil.KEY.length;
+  /* 2012-01-01 00:00:00 */
+  private long THE_VERY_BEGINNING = 1325347200000L;
   /* the base dir defined by base.dir property */
   public static String baseDir = "";
   /* an incremental id */
@@ -163,11 +165,26 @@ public class SyncTable implements Tool {
     private Hbase.Client client;
     private HTableInterface table;
     
+    private long startTime;
+    private long endTime;
+    
     private String startRow;
     private String endRow;
     
+    private boolean firstSyncFlag = false;
+    
+    public Worker(String rowRange, boolean firstSync) {
+      this.rowRange = rowRange;
+      this.firstSyncFlag = firstSync;
+      firstSyncFlag = firstSync;
+      startTime = THE_VERY_BEGINNING;
+    }
+    
     public Worker(String rowRange) {
       this.rowRange = rowRange;
+      firstSyncFlag = false;
+      startTime = System.currentTimeMillis() - SCAN_INTERVAL;
+      endTime = System.currentTimeMillis();      
     }
     
     private void parseRowRange() {
@@ -382,27 +399,21 @@ public class SyncTable implements Tool {
   public int run(String[] args) throws Exception {
     setup(args);
     
+    /** 
+     * start the first sync workers from 2012-01-01 00:00:00(timestamp: 1325347200000).
+     */
+    ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
+    for(int i = 0; i < WORKER_COUNT; i++) {
+      exec.execute(new Worker(PersonalUtil.KEY[i]));
+    }
+    exec.shutdown();
+    
     /**
-     * 启动timer
+     * start timer, sync table ever 30 minutes for last 40 minutes chenages. 
      */
     syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
     cleanup();
     return 0;
-    
-    /* ExecutorService printExec = Executors.newSingleThreadExecutor();
-    printExec.execute(new Printer());
-    printExec.shutdown();
-    
-    int threadPoolSize = PersonalUtil.KEY.length;
-    ExecutorService exec = Executors.newFixedThreadPool(threadPoolSize);
-    for (int i = 0; i < threadPoolSize; i++) {
-      exec.execute(new Worker(PersonalUtil.KEY[i]));
-    }
-    exec.shutdown();
-    while (!exec.isTerminated()) {
-      Thread.sleep(500);
-    }
-    printSignal = false; */
   }
   
   /**
