@@ -43,5 +43,5 @@ elif [ "${COMMAND}" = "hdfs" ]; then
   CLASS="com.iflytek.hbase.main.HdfsToHbase"
 fi
 
-${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
+${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@ &
 
