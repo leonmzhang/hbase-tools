@@ -179,6 +179,7 @@ public class SyncTable implements Tool {
       this.firstSyncFlag = firstSync;
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
+      endTime = System.currentTimeMillis();
     }
     
     public Worker(String rowRange) {
