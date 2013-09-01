@@ -341,7 +341,7 @@ public class SyncTable implements Tool {
       try {
         setup();
         doWork();
-      } catch (TTransportException e) {
+      } catch (Exception e) {
         LOG.error("worker setup failed", e);
         return;
       } finally {
