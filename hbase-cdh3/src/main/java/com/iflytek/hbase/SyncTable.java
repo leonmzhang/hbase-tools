@@ -6,11 +6,15 @@ import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,7 +50,18 @@ import com.iflytek.personal.RowMessage;
 
 public class SyncTable implements Tool {
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
-
+  
+  /* the interval of sync task */
+  private static final long SYNC_INTERVAL = 30 * 60 * 1000;
+  
+  /* scan threads per task */
+  private static final int WORKER_COUNT = PersonalUtil.KEY.length;
+  
+  /* an incremental id */
+  private AtomicInteger taskID = new AtomicInteger(0);
+  
+  private Timer syncTimer;
+  
   private ArrayList<String> thriftServers = new ArrayList<String>();
   
   private String getDesThriftServer() {
@@ -63,6 +78,40 @@ public class SyncTable implements Tool {
   
   public SyncTable(Configuration conf) {
     this.conf = new Configuration(conf);
+    syncTimer = new Timer();
+  }
+  
+  public class SyncTask extends TimerTask {
+    
+    int taskId = 0;
+    
+    @Override
+    public void run() {
+      LOG.info("New sync task " + this.taskId + " is begin.");
+      this.taskId = taskID.incrementAndGet();
+      Date taskStartTime = new Date();
+      long startTimestamp = System.currentTimeMillis();
+      
+      ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
+      for(int i = 0; i < WORKER_COUNT; i++ ) {
+        LOG.info("start scan worker for key: " + PersonalUtil.KEY[i]);
+        exec.execute(new Worker(PersonalUtil.KEY[i]));
+      }
+      exec.shutdown();
+      
+      while(!exec.isTerminated()) {
+        try {
+          Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
+      }
+      
+      long endTimestamp = System.currentTimeMillis();
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      LOG.info("Sync task " + this.taskId + " which start at "
+          + sdf.format(taskStartTime) + "is done, total cost: "
+          + (endTimestamp - startTimestamp) + ".");
+    }
   }
   
   public class Printer implements Runnable {
@@ -309,7 +358,15 @@ public class SyncTable implements Tool {
   
   @Override
   public int run(String[] args) throws Exception {
+    /**
+     * 启动timer
+     */
+    syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
+    // TODO! this place will return
+    
     setup(args);
+    
+    
     
     ExecutorService printExec = Executors.newSingleThreadExecutor();
     printExec.execute(new Printer());
