@@ -23,4 +23,8 @@ public class PathParser {
     }
     return;
   }
+  
+  public static void main(String[] args) {
+    
+  }
 }
