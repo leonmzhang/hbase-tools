@@ -32,7 +32,7 @@ public class PersonalTest {
     String oldQualify = "/contact/a100000121@contact.bin";
     byte[] value = new byte[1];
     
-    Personal personal = new Personal();
+    PersonalCell personal = new PersonalCell();
     personal.parsePersonalData(oldRowKey, oldFamily, oldQualify, value);
     printCell(personal.getHbaseCell());
   }

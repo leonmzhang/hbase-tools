@@ -19,7 +19,7 @@ public class RowMessage {
     return msg;
   }
   
-  public void appendCellMsg(Personal personal) {
+  public void appendCellMsg(PersonalCell personal) {
     
   }
   

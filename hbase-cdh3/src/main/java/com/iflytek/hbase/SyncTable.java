@@ -44,7 +44,7 @@ import org.apache.thrift.transport.TTransportException;
 import com.iflytek.hbase.thrift.generated.Hbase;
 import com.iflytek.hbase.thrift.generated.Mutation;
 import com.iflytek.hbase.thrift.generated.TCell;
-import com.iflytek.personal.Personal;
+import com.iflytek.personal.PersonalCell;
 import com.iflytek.personal.PersonalParseException;
 import com.iflytek.personal.PersonalUtil;
 import com.iflytek.personal.RowMessage;
@@ -87,7 +87,8 @@ public class SyncTable implements Tool {
   private BlockingQueue<StringBuilder> printQueue;
   private boolean printSignal;
   
-  private AtomicInteger totalCount;
+  private AtomicInteger taskSyncCount = new AtomicInteger(0);
+  private AtomicInteger firstSyncCount = new AtomicInteger(0);
   
   public SyncTable(Configuration conf) {
     this.conf = new Configuration(conf);
@@ -231,8 +232,6 @@ public class SyncTable implements Tool {
       MessageDigest msgDigest = null;
       int valueLength = 0;
       
-      int count = 0;
-      
       /* use for new personal table */
       Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
       List<Mutation> mutations = new ArrayList<Mutation>();
@@ -291,12 +290,13 @@ public class SyncTable implements Tool {
             oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
                 Bytes.toBytes(oldQualify)).getTimestamp();
             value = (byte[]) entry.getValue();
-            LOG.info(firstSyncFlag ? "first sync, " : "" + "get old personal cell, row: " + oldRowKey + ", column: "
+            LOG.info(firstSyncFlag ? "first sync, " : ""
+                + "get old personal cell, row: " + oldRowKey + ", column: "
                 + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
                 + ", modify time: "
                 + Common.unixTimestampToDateStr(oldTimestamp));
             
-            Personal personal = new Personal();
+            PersonalCell personal = new PersonalCell();
             try {
               personal.parsePersonalData(oldRowKey,
                   PersonalUtil.OLD_FAMILY_STR, oldQualify, value);
@@ -319,8 +319,9 @@ public class SyncTable implements Tool {
                   newColumnByte, attributes);
               if (cellList.isEmpty()
                   || cellList.get(0).timestamp < oldTimestamp) {
-                LOG.info(firstSyncFlag ? "first sync, " : "" + "sync cell, table: " + newTable + ", row: "
-                    + newRowKey + ", column: " + newColumn + ", modify time: "
+                LOG.info(firstSyncFlag ? "first sync, " : ""
+                    + "sync cell, table: " + newTable + ", row: " + newRowKey
+                    + ", column: " + newColumn + ", modify time: "
                     + Common.unixTimestampToDateStr(oldTimestamp));
                 client.mutateRowTs(newTableByte, newRowByte, mutations,
                     oldTimestamp, attributes);
@@ -332,9 +333,18 @@ public class SyncTable implements Tool {
             }
           }
           
-          count = totalCount.incrementAndGet();
-          if (count % 1000 == 0) {
-            LOG.info("Already scan: " + count);
+          int count = 0;
+          if (firstSyncFlag) {
+            count = firstSyncCount.incrementAndGet();
+            if (count % 1000 == 0) {
+              LOG.info("first sync, alread scan: " + count + " rows");
+            }
+            
+          } else {
+            count = taskSyncCount.incrementAndGet();
+            if (count % 1000 == 0) {
+              LOG.info("task sync, alread scan: " + count + " rows");
+            }
           }
         } while (result != null);
       } catch (Exception e) {
@@ -365,7 +375,6 @@ public class SyncTable implements Tool {
     tablePool = new HTablePool(conf, 1024);
     printQueue = new LinkedBlockingDeque<StringBuilder>();
     printSignal = true;
-    totalCount = new AtomicInteger();
     
     // String thriftServerStr = conf.get(Constants.DES_HBASE_THRIFT_SERVERS);
     String thriftServerStr = THRIFT_SERVERS;
@@ -403,7 +412,7 @@ public class SyncTable implements Tool {
     for (int i = 0; i < WORKER_COUNT; i++) {
       LOG.info("start first sync scan worker for row range: "
           + PersonalUtil.KEY[i]);
-      exec.execute(new Worker(PersonalUtil.KEY[i],  true));
+      exec.execute(new Worker(PersonalUtil.KEY[i], true));
     }
     exec.shutdown();
     
