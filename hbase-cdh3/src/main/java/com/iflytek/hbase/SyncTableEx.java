@@ -309,6 +309,8 @@ public class SyncTableEx implements Tool {
                     + Common.unixTimestampToDateStr(oldTimestamp));
                 client.mutateRowTs(newTableByte, newRowByte, mutations,
                     oldTimestamp, attributes);
+              } else {
+                LOG.info("do not need to sync.");
               }
             } catch (PersonalParseException e) {
               LOG.warn("", e);
