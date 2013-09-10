@@ -54,10 +54,15 @@ public class SyncTable implements Tool {
    * these configurations should be in configuration file, but now I put them
    * here for fast implement
    */
-  private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
-      + "192.168.150.18,192.168.150.19,192.168.150.20";
-  private static final String THRIFT_SERVERS = "192.168.150.22,"
-      + "192.168.150.23,192.168.150.24,192.168.150.25";
+  // private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
+  // + "192.168.150.18,192.168.150.19,192.168.150.20";
+  private static final String ZK_QUORUM = "192.168.71.47,192.168.71.239,"
+      + "192.168.71.241,192.168.71.243,192.168.71.245,192.168.71.248,192.168.71.249";
+  // private static final String THRIFT_SERVERS = "192.168.150.22,"
+  // + "192.168.150.23,192.168.150.24,192.168.150.25";
+  private static final String THRIFT_SERVERS = "192.168.151.103,192.168.151.104,"
+      + "192.168.151.104,192.168.151.106,192.168.151.107,192.168.151.108,192.168.151.109,"
+      + "192.168.151.110";
   
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   /* the interval of sync task, 30 minute */
