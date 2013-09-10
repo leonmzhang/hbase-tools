@@ -108,39 +108,6 @@ public class SyncTableEx implements Tool {
     syncTimer = new Timer();
   }
   
-  public class SyncTask extends TimerTask {
-    
-    int taskId = 0;
-    
-    @Override
-    public void run() {
-      LOG.info("New sync task " + this.taskId + " is begin.");
-      this.taskId = taskID.incrementAndGet();
-      Date taskStartTime = new Date();
-      long startTimestamp = System.currentTimeMillis();
-      
-      ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
-      for (int i = 0; i < WORKER_COUNT; i++) {
-        LOG.info("start timer sync scan worker for row range: "
-            + PersonalUtil.KEY[i]);
-        exec.execute(new Worker(PersonalUtil.KEY[i]));
-      }
-      exec.shutdown();
-      
-      while (!exec.isTerminated()) {
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e) {}
-      }
-      
-      long endTimestamp = System.currentTimeMillis();
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      LOG.info("Sync task " + this.taskId + " which start at "
-          + sdf.format(taskStartTime) + " is done, total cost: "
-          + (endTimestamp - startTimestamp) + ".");
-    }
-  }
-  
   public class Printer implements Runnable {
     
     @Override
@@ -417,13 +384,8 @@ public class SyncTableEx implements Tool {
   @Override
   public int run(String[] args) throws Exception {
     setup(args);
-    
-    /**
-     * start the first sync workers from 2012-01-01 00:00:00 (timestamp:
-     * 1325347200000).
-     */
+
     ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
-    //for (int i = 0; i < WORKER_COUNT; i++) {
     for (int i = 0; i < 1; i++) {
       LOG.info("start first sync scan worker for row range: "
           + PersonalUtil.KEY[i]);
@@ -431,10 +393,6 @@ public class SyncTableEx implements Tool {
     }
     exec.shutdown();
     
-    /**
-     * start timer, sync table ever 30 minutes for last 40 minutes chenages.
-     */
-    //syncTimer.schedule(new SyncTask(), 0, SYNC_INTERVAL);
     cleanup();
     return 0;
   }
