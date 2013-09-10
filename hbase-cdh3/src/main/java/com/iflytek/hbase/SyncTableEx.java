@@ -274,7 +274,7 @@ public class SyncTableEx implements Tool {
             oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
                 Bytes.toBytes(oldQualify)).getTimestamp();
             value = (byte[]) entry.getValue();
-            LOG.info(firstSyncFlag ? "first sync, " : ""
+            LOG.info((firstSyncFlag ? "first sync, " : "")
                 + "get old personal cell, row: " + oldRowKey + ", column: "
                 + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
                 + ", modify time: "
