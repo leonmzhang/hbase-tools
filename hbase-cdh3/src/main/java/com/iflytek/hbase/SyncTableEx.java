@@ -160,7 +160,7 @@ public class SyncTableEx implements Tool {
       this.firstSyncFlag = firstSync;
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
-      //endTime = System.currentTimeMillis();
+      // endTime = System.currentTimeMillis();
       endTime = THE_NEW_DEPLOY_TIME;
     }
     
@@ -242,6 +242,9 @@ public class SyncTableEx implements Tool {
         msgDigest = MessageDigest.getInstance("MD5");
         
         scan.setTimeRange(startTime, endTime);
+        LOG.info("set time range, min time: "
+            + Common.unixTimestampToDateStr(startTime) + ", max time: "
+            + Common.unixTimestampToDateStr(endTime));
         scan.addFamily(PersonalUtil.OLD_FAMILY_BYTE);
         scan.setStartRow(Bytes.toBytes(startRow));
         scan.setStopRow(Bytes.toBytes(endRow));
@@ -384,7 +387,7 @@ public class SyncTableEx implements Tool {
   @Override
   public int run(String[] args) throws Exception {
     setup(args);
-
+    
     ExecutorService exec = Executors.newFixedThreadPool(WORKER_COUNT);
     for (int i = 0; i < 1; i++) {
       LOG.info("start first sync scan worker for row range: "
@@ -408,7 +411,7 @@ public class SyncTableEx implements Tool {
     Configuration conf = new Configuration();
     // conf.addResource("hbase-tools.xml");
     
-    SyncTable st = new SyncTable(conf);
+    SyncTableEx st = new SyncTableEx(conf);
     ToolRunner.run(st, args);
   }
 }
