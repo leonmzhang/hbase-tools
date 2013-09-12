@@ -55,8 +55,8 @@ public class SyncTableEx implements Tool {
    * here for fast implement
    */
   // gz
-  private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
-      + "192.168.150.18,192.168.150.19,192.168.150.20";
+  // private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
+  // + "192.168.150.18,192.168.150.19,192.168.150.20";
   private static final String THRIFT_SERVERS = "192.168.150.22,"
       + "192.168.150.23,192.168.150.24,192.168.150.25";
   
@@ -70,6 +70,13 @@ public class SyncTableEx implements Tool {
   // "192.168.151.104,192.168.151.106,192.168.151.107,192.168.151.108,192.168.151.109,"
   // + "192.168.151.110";
   
+  // hf
+  private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
+      + "192.168.52.15,192.168.52.16,192.168.52.17";
+  // private static final String THRIFT_SERVERS =
+  // "192.168.52.232,192.168.52.233,"
+  // + "192.168.52.234,192.168.52.248";
+  
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   /* the interval of sync task, 30 minute */
   private static final long SYNC_INTERVAL = 30 * 60 * 1000;
@@ -80,7 +87,9 @@ public class SyncTableEx implements Tool {
   /* 2012-01-01 00:00:00 */
   private long THE_VERY_BEGINNING = 1325347200000L;
   /* 2013-09-06 00:00:00 */
-  private long THE_NEW_DEPLOY_TIME = 1378396800000L;
+  private long THE_NEW_DEPLOY_TIME_GZ = 1378396800000L;
+  /* 2013-09-12 00:00:00 */
+  private long THE_NEW_DEPLOY_TIME_BJ = 1378915200000L;
   /* the base dir defined by base.dir property */
   public static String baseDir = "";
   /* an incremental id */
@@ -161,7 +170,7 @@ public class SyncTableEx implements Tool {
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
       // endTime = System.currentTimeMillis();
-      endTime = THE_NEW_DEPLOY_TIME;
+      endTime = THE_NEW_DEPLOY_TIME_GZ;
     }
     
     public Worker(String rowRange) {
@@ -307,8 +316,8 @@ public class SyncTableEx implements Tool {
                     + "sync cell, table: " + newTable + ", row: " + newRowKey
                     + ", column: " + newColumn + ", modify time: "
                     + Common.unixTimestampToDateStr(oldTimestamp));
-                client.mutateRowTs(newTableByte, newRowByte, mutations,
-                    oldTimestamp, attributes);
+                // client.mutateRowTs(newTableByte, newRowByte, mutations,
+                // oldTimestamp, attributes);
               } else {
                 LOG.info("do not need to sync.");
               }
