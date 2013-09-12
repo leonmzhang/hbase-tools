@@ -324,7 +324,7 @@ public class SyncTable implements Tool {
                   newColumnByte, attributes);
               if (cellList.isEmpty()
                   || cellList.get(0).timestamp < oldTimestamp) {
-                LOG.info(firstSyncFlag ? "first sync, " : ""
+                LOG.info((firstSyncFlag ? "first sync, " : "")
                     + "sync cell, table: " + newTable + ", row: " + newRowKey
                     + ", column: " + newColumn + ", modify time: "
                     + Common.unixTimestampToDateStr(oldTimestamp));
