@@ -316,8 +316,8 @@ public class SyncTableEx implements Tool {
                     + "sync cell, table: " + newTable + ", row: " + newRowKey
                     + ", column: " + newColumn + ", modify time: "
                     + Common.unixTimestampToDateStr(oldTimestamp));
-                // client.mutateRowTs(newTableByte, newRowByte, mutations,
-                // oldTimestamp, attributes);
+                client.mutateRowTs(newTableByte, newRowByte, mutations,
+                    oldTimestamp, attributes);
               } else {
                 LOG.info("do not need to sync.");
               }
