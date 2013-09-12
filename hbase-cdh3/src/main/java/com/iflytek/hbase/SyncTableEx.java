@@ -287,7 +287,8 @@ public class SyncTableEx implements Tool {
                 + "get old personal cell, row: " + oldRowKey + ", column: "
                 + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
                 + ", modify time: "
-                + Common.unixTimestampToDateStr(oldTimestamp));
+                + Common.unixTimestampToDateStr(oldTimestamp)
+                + ", old path: " + oldQualify);
             
             PersonalCell personal = new PersonalCell();
             try {
