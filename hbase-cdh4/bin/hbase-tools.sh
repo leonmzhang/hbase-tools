@@ -23,6 +23,8 @@ if [ "${COMMAND}" = "scan" ]; then
   CLASS="com.iflytek.hbase.ScanTool"
 elif [ "${COMMAND}" = "get" ]; then
   CLASS="com.iflytek.hbase.GetTool"
+elif [ "${COMMAND}" = "put" ]; then
+  CLASS="com.iflytek.hbase.PuttTool"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
