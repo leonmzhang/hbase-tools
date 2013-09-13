@@ -98,8 +98,11 @@ public class SyncList {
     Mutation mutation = null;
     Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
     
+    int count = 0;
+    
     while ((line = br.readLine()) != null) {
-      LOG.info("proecess: " + line);
+      count++;
+      LOG.info("proecess [" + count + "] line: " + line);
       PathParser pp = new PathParser();
       try {
         pp.parseFullPath(line);
