@@ -39,19 +39,17 @@ public class PutTool implements Tool {
     File txtFile = new File(
         "/home/mingzhang2/hbase-tools/hbase-cdh4/app_4f58bb41@reslist.txt");
     
-
-    if(!binFile.exists() || !txtFile.exists()) {
+    if (!binFile.exists() || !txtFile.exists()) {
       LOG.warn("files do not exist");
       return -1;
     }
-        FileInputStream fisBin = new FileInputStream(binFile);
-        FileInputStream fisTxt = new FileInputStream(binFile);
-        
-        byte[] binValue = new byte[(int)binFile.length()];
-        byte[] txtValue = new byte[(int)txtFile.length()];
-        fisBin.read(binValue);
-        fisTxt.read(txtValue);
-        
+    FileInputStream fisBin = new FileInputStream(binFile);
+    FileInputStream fisTxt = new FileInputStream(txtFile);
+    
+    byte[] binValue = new byte[(int) binFile.length()];
+    byte[] txtValue = new byte[(int) txtFile.length()];
+    fisBin.read(binValue);
+    fisTxt.read(txtValue);
     
     conf.set("hbase.zookeeper.quorum", "192.168.150.21");
     HTable table = new HTable(conf, "personal");
