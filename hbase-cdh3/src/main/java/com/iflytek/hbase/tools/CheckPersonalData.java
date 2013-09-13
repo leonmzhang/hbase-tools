@@ -115,7 +115,7 @@ public class CheckPersonalData {
           byte[] value = (byte[]) entry.getValue();
           PathParser parser = new PathParser();
           parser.parsePartPath(newRowStr, qualify);
-          ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(parser.column));
+          ByteBuffer newColumn = ByteBuffer.wrap(Bytes.toBytes(parser.newColumn));
           ByteBuffer newTableName = ByteBuffer.wrap(Bytes.toBytes("personal"));
           ByteBuffer newRow = ByteBuffer.wrap(Bytes.toBytes(rowStr
               .startsWith("aa") ? rowStr.substring(1) : rowStr));
@@ -124,7 +124,7 @@ public class CheckPersonalData {
                 attributes);
             if (cellList.isEmpty()) {
               LOG.info("new hbase does not have this cell, row: "
-                  + parser.rowKey + ", column: " + parser.column);
+                  + parser.newRowKey + ", column: " + parser.newColumn);
             }
           } catch (Exception e) {
             if(e instanceof NoSuchColumnFamilyException) {
