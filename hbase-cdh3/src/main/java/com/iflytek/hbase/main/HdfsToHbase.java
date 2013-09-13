@@ -24,7 +24,6 @@ import com.iflytek.hbase.thrift.generated.Hbase;
 import com.iflytek.hbase.thrift.generated.Mutation;
 import com.iflytek.hbase.thrift.generated.TCell;
 import com.iflytek.hbase.util.HbaseCell;
-import com.kenai.jaffl.annotations.Clear;
 
 public class HdfsToHbase {
   private static final Log LOG = LogFactory.getLog(HdfsToHbase.class);
