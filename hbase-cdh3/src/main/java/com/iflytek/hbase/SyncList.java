@@ -18,6 +18,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -111,6 +112,10 @@ public class SyncList {
       result = table.get(get);
       
       familyMap = result.getFamilyMap(PersonalUtil.OLD_FAMILY_BYTE);
+      if(familyMap.isEmpty()) {
+        LOG.info("does not exists in old hbase");
+        continue;
+      }
       for (Map.Entry<?,?> entry : familyMap.entrySet()) {
         oldQualify = Bytes.toString((byte[]) entry.getKey());
         oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
@@ -167,6 +172,9 @@ public class SyncList {
    * @param args
    */
   public static void main(String[] args) throws Exception {
+    String baseDir = System.getProperty("base.dir");
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
+    
     Configuration conf = new Configuration();
     
     SyncList syncList = new SyncList();
