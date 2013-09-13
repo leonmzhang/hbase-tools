@@ -112,10 +112,14 @@ public class SyncList {
       }
       oldRowKey = pp.oldRowKey;
       Get get = new Get(Bytes.toBytes(oldRowKey));
-      result = table.get(get);
+      try {
+        result = table.get(get);
+      } catch (Exception e) {
+        LOG.warn("", e);
+      }
       
       familyMap = result.getFamilyMap(PersonalUtil.OLD_FAMILY_BYTE);
-      if(familyMap == null || familyMap.isEmpty()) {
+      if (familyMap == null || familyMap.isEmpty()) {
         LOG.info("does not exists in old hbase");
         continue;
       }
@@ -129,7 +133,7 @@ public class SyncList {
             + ", modify time: " + Common.unixTimestampToDateStr(oldTimestamp)
             + ", old path: " + oldQualify);
         
-        if(oldTimestamp > 1378688400000L) {
+        if (oldTimestamp > 1378688400000L) {
           LOG.info("late than deploy");
           continue;
         }
@@ -161,8 +165,8 @@ public class SyncList {
             LOG.info("sync cell, table: " + newTable + ", row: " + newRowKey
                 + ", column: " + newColumn + ", modify time: "
                 + Common.unixTimestampToDateStr(oldTimestamp));
-//            client.mutateRowTs(newTableByte, newRowByte, mutations,
-//                oldTimestamp, attributes);
+            // client.mutateRowTs(newTableByte, newRowByte, mutations,
+            // oldTimestamp, attributes);
           } else {
             LOG.info("do not need to sync.");
           }
