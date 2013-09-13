@@ -47,8 +47,8 @@ public class PutTool implements Tool {
         FileInputStream fisBin = new FileInputStream(binFile);
         FileInputStream fisTxt = new FileInputStream(binFile);
         
-        byte[] binValue = new byte[1024 * 1024];
-        byte[] txtValue = new byte[1024 * 1024];
+        byte[] binValue = new byte[(int)binFile.length()];
+        byte[] txtValue = new byte[(int)txtFile.length()];
         fisBin.read(binValue);
         fisTxt.read(txtValue);
         
