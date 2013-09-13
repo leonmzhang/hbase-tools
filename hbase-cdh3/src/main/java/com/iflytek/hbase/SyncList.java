@@ -112,7 +112,7 @@ public class SyncList {
       result = table.get(get);
       
       familyMap = result.getFamilyMap(PersonalUtil.OLD_FAMILY_BYTE);
-      if(familyMap.isEmpty()) {
+      if(familyMap == null || familyMap.isEmpty()) {
         LOG.info("does not exists in old hbase");
         continue;
       }
