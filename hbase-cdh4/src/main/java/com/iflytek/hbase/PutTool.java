@@ -58,7 +58,7 @@ public class PutTool implements Tool {
     Put putBin = new Put(Bytes.toBytes("app_4f58bb41"));
     putBin.add(Bytes.toBytes("p"), Bytes.toBytes("reslist.bin"), binValue);
     Put putTxt = new Put(Bytes.toBytes("app_4f58bb41"));
-    putBin.add(Bytes.toBytes("p"), Bytes.toBytes("reslist.txt"), txtValue);
+    putTxt.add(Bytes.toBytes("p"), Bytes.toBytes("reslist.txt"), txtValue);
     
     table.put(putBin);
     table.put(putTxt);
