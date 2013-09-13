@@ -126,6 +126,11 @@ public class SyncList {
             + ", modify time: " + Common.unixTimestampToDateStr(oldTimestamp)
             + ", old path: " + oldQualify);
         
+        if(oldTimestamp > 1378688400000L) {
+          LOG.info("late than deploy");
+          continue;
+        }
+        
         PersonalCell personal = new PersonalCell();
         try {
           // personal.parsePersonalData(oldRowKey, PersonalUtil.OLD_FAMILY_STR,
