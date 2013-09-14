@@ -12,7 +12,6 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.PropertyConfigurator;
-import org.omg.CORBA.CODESET_INCOMPATIBLE;
 
 public class ScanRowList {
   private static final Log LOG = LogFactory.getLog(ScanRowList.class);
