@@ -286,7 +286,7 @@ public class SyncTable implements Tool {
             if (result == null) {
               break;
             }
-          } catch (ScannerTimeoutException e) {
+          } catch (Exception e) {
             LOG.warn("scanner timeout, get scanner from last row: "
                 + lastScanRow, e);
             scan.setStartRow(Bytes.toBytes(lastScanRow));
