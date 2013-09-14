@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.PropertyConfigurator;
 
 public class ScanRowList {
   private static final Log LOG = LogFactory.getLog(ScanRowList.class);
@@ -20,6 +21,7 @@ public class ScanRowList {
    */
   public static void main(String[] args) {
     String baseDir = System.getProperty("base.dir");
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     Configuration conf = new Configuration();
     conf.set(Constants.HBASE_ZOOKEEPER_QUORUM,
