@@ -31,6 +31,8 @@ shift
 
 if [ "${COMMAND}" = "scan" ]; then
   CLASS="com.iflytek.hbase.ScanTool"
+elif [ "${COMMAND}" = "scan_list" ]; then
+  CLASS="com.iflytek.hbase.ScanRowList"
 elif [ "${COMMAND}" = "get" ]; then
   CLASS="com.iflytek.hbase.GetTool"
 elif [ "${COMMAND}" = "sync" ]; then
