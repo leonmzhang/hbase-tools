@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.PropertyConfigurator;
+import org.omg.CORBA.CODESET_INCOMPATIBLE;
 
 public class ScanRowList {
   private static final Log LOG = LogFactory.getLog(ScanRowList.class);
@@ -22,6 +23,21 @@ public class ScanRowList {
   public static void main(String[] args) {
     String baseDir = System.getProperty("base.dir");
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
+    
+    String zkQuonum = null;
+    if(args.length == 0) {
+      System.out.println("input area!");
+      System.exit(-1);
+    } else if("gz".equals(args[0])) {
+      zkQuonum = Constants.GZ_HBASE_ZOOKEEPER_QUORUM;      
+    } else if("hf".equals(args[0])) {
+      zkQuonum = Constants.HF_HBASE_ZOOKEEPER_QUORUM;
+    } else if("bj".equals(args[0])) {
+      zkQuonum = Constants.BJ_HBASE_ZOOKEEPER_QUORUM;
+    } else {
+      System.out.print("wrong area!");
+      System.exit(-1);
+    }
     
     Configuration conf = new Configuration();
     conf.set(Constants.HBASE_ZOOKEEPER_QUORUM,
