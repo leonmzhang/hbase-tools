@@ -116,7 +116,9 @@ public class HdfsToHbase {
   }
   
   private void hbasePut(HbaseCell cell) throws Exception {
-    String host = "192.168.150.24";
+    // gz
+    //String host = "192.168.150.24";
+    String host = "192.168.151.104";
     int port = 9090;
     TTransport transport = new TSocket(host, port);
     TProtocol protocol = new TBinaryProtocol(transport);
@@ -184,7 +186,10 @@ public class HdfsToHbase {
   public static void main(String[] args) {
     Common.globalInit();
     Configuration conf = new Configuration();
-    conf.set("fs.default.name", "hdfs://namenode-gz.iflytek.com:9040");
+    //gz
+    //conf.set("fs.default.name", "hdfs://namenode-gz.iflytek.com:9040");
+    //bj
+    conf.set("fs.default.name", "hdfs://bjidss47.iflytek.com:9041");
     HdfsToHbase h2h = new HdfsToHbase();
     h2h.runTool(conf, args);
   }
