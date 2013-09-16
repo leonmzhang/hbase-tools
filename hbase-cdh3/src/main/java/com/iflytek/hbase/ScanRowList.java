@@ -24,14 +24,14 @@ public class ScanRowList {
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     String zkQuonum = null;
-    if(args.length == 0) {
+    if (args.length == 0) {
       System.out.println("input area!");
       System.exit(-1);
-    } else if("gz".equals(args[0])) {
-      zkQuonum = Constants.GZ_HBASE_ZOOKEEPER_QUORUM;      
-    } else if("hf".equals(args[0])) {
+    } else if ("gz".equals(args[0])) {
+      zkQuonum = Constants.GZ_HBASE_ZOOKEEPER_QUORUM;
+    } else if ("hf".equals(args[0])) {
       zkQuonum = Constants.HF_HBASE_ZOOKEEPER_QUORUM;
-    } else if("bj".equals(args[0])) {
+    } else if ("bj".equals(args[0])) {
       zkQuonum = Constants.BJ_HBASE_ZOOKEEPER_QUORUM;
     } else {
       System.out.print("wrong area!");
@@ -51,7 +51,7 @@ public class ScanRowList {
       ResultScanner scanner = table.getScanner(scan);
       Result result = null;
       String rowkey = null;
-      String lastRowKey = null;
+      String lastScanRow = null;
       
       do {
         try {
@@ -60,13 +60,17 @@ public class ScanRowList {
             break;
           }
         } catch (Exception e) {
-          LOG.warn("get scanner next failed, last row key: " + lastRowKey, e);
-          scan.setStartRow(Bytes.toBytes(lastRowKey));
+          LOG.warn("get scanner next failed, last row key: " + lastScanRow, e);
+          char lastChar = lastScanRow.charAt(lastScanRow.length() - 1);
+          lastChar += 1;
+          lastScanRow = lastScanRow.substring(0, lastScanRow.length() - 1)
+              + lastChar;
+          scan.setStartRow(Bytes.toBytes(lastScanRow));
           scanner.close();
           scanner = table.getScanner(scan);
         }
         rowkey = Bytes.toString(result.getRow());
-        lastRowKey = rowkey;
+        lastScanRow = rowkey;
         pw.write(rowkey);
         pw.write(Constants.LINE_SEPARATOR);
         pw.flush();
