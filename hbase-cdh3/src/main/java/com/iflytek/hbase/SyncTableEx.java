@@ -55,10 +55,10 @@ public class SyncTableEx implements Tool {
    * here for fast implement
    */
   // gz
-   private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
-   + "192.168.150.18,192.168.150.19,192.168.150.20";
-  private static final String THRIFT_SERVERS = "192.168.150.22,"
-      + "192.168.150.23,192.168.150.24,192.168.150.25";
+  // private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
+  // + "192.168.150.18,192.168.150.19,192.168.150.20";
+  // private static final String THRIFT_SERVERS = "192.168.150.22,"
+  // + "192.168.150.23,192.168.150.24,192.168.150.25";
   
   // bj
   // private static final String ZK_QUORUM = "192.168.71.47,192.168.71.239,"
@@ -71,11 +71,10 @@ public class SyncTableEx implements Tool {
   // + "192.168.151.110";
   
   // hf
-  // private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
-  // + "192.168.52.15,192.168.52.16,192.168.52.17";
-  // private static final String THRIFT_SERVERS =
-  // "192.168.52.232,192.168.52.233,"
-  // + "192.168.52.234,192.168.52.248";
+  private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
+      + "192.168.52.15,192.168.52.16,192.168.52.17";
+  private static final String THRIFT_SERVERS = "192.168.52.232,192.168.52.233,"
+      + "192.168.52.234,192.168.52.248";
   
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   /* the interval of sync task, 30 minute */
@@ -170,7 +169,7 @@ public class SyncTableEx implements Tool {
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
       endTime = System.currentTimeMillis();
-      //endTime = THE_NEW_DEPLOY_TIME_GZ;
+      // endTime = THE_NEW_DEPLOY_TIME_GZ;
     }
     
     public Worker(String rowRange) {
@@ -270,7 +269,8 @@ public class SyncTableEx implements Tool {
                 + lastScanRow, e);
             char lastChar = lastScanRow.charAt(lastScanRow.length() - 1);
             lastChar += 1;
-            lastScanRow = lastScanRow.substring(0, lastScanRow.length() - 1) + lastChar;
+            lastScanRow = lastScanRow.substring(0, lastScanRow.length() - 1)
+                + lastChar;
             scan.setStartRow(Bytes.toBytes(lastScanRow));
             scanner.close();
             scanner = table.getScanner(scan);
@@ -290,8 +290,8 @@ public class SyncTableEx implements Tool {
                 + "get old personal cell, row: " + oldRowKey + ", column: "
                 + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
                 + ", modify time: "
-                + Common.unixTimestampToDateStr(oldTimestamp)
-                + ", old path: " + oldQualify);
+                + Common.unixTimestampToDateStr(oldTimestamp) + ", old path: "
+                + oldQualify);
             
             PersonalCell personal = new PersonalCell();
             try {
