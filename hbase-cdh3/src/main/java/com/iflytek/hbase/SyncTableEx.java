@@ -55,8 +55,8 @@ public class SyncTableEx implements Tool {
    * here for fast implement
    */
   // gz
-  // private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
-  // + "192.168.150.18,192.168.150.19,192.168.150.20";
+   private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
+   + "192.168.150.18,192.168.150.19,192.168.150.20";
   private static final String THRIFT_SERVERS = "192.168.150.22,"
       + "192.168.150.23,192.168.150.24,192.168.150.25";
   
@@ -71,8 +71,8 @@ public class SyncTableEx implements Tool {
   // + "192.168.151.110";
   
   // hf
-  private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
-      + "192.168.52.15,192.168.52.16,192.168.52.17";
+  // private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
+  // + "192.168.52.15,192.168.52.16,192.168.52.17";
   // private static final String THRIFT_SERVERS =
   // "192.168.52.232,192.168.52.233,"
   // + "192.168.52.234,192.168.52.248";
