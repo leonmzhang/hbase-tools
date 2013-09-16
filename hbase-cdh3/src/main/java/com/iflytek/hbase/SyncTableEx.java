@@ -169,8 +169,8 @@ public class SyncTableEx implements Tool {
       this.firstSyncFlag = firstSync;
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
-      // endTime = System.currentTimeMillis();
-      endTime = THE_NEW_DEPLOY_TIME_GZ;
+      endTime = System.currentTimeMillis();
+      //endTime = THE_NEW_DEPLOY_TIME_GZ;
     }
     
     public Worker(String rowRange) {
