@@ -166,7 +166,8 @@ public class SyncTableEx implements Tool {
       this.firstSyncFlag = firstSync;
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
-      endTime = System.currentTimeMillis();
+      //endTime = System.currentTimeMillis();
+      endTime = 1379804400000L;
       // endTime = THE_NEW_DEPLOY_TIME_GZ;
     }
     
@@ -284,12 +285,12 @@ public class SyncTableEx implements Tool {
             oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
                 Bytes.toBytes(oldQualify)).getTimestamp();
             value = (byte[]) entry.getValue();
-            LOG.info((firstSyncFlag ? "first sync, " : "")
-                + "get old personal cell, row: " + oldRowKey + ", column: "
-                + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
-                + ", modify time: "
-                + Common.unixTimestampToDateStr(oldTimestamp) + ", old path: "
-                + oldQualify);
+//            LOG.info((firstSyncFlag ? "first sync, " : "")
+//                + "get old personal cell, row: " + oldRowKey + ", column: "
+//                + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
+//                + ", modify time: "
+//                + Common.unixTimestampToDateStr(oldTimestamp) + ", old path: "
+//                + oldQualify);
             
             PersonalCell personal = new PersonalCell();
             try {
@@ -321,7 +322,7 @@ public class SyncTableEx implements Tool {
                 client.mutateRowTs(newTableByte, newRowByte, mutations,
                     oldTimestamp, attributes);
               } else {
-                LOG.info("do not need to sync.");
+                //LOG.info("do not need to sync.");
               }
             } catch (PersonalParseException e) {
               LOG.warn("", e);

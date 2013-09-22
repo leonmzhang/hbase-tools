@@ -42,7 +42,7 @@ public class SyncList {
   
   static {
     options.addOption("l", "list", true, "");
-    
+    options.addOption("u", "uid", true, "");
   }
   
   private String getDesThriftServer() {
@@ -53,9 +53,14 @@ public class SyncList {
   
   public int runTool(Configuration conf, String[] args) throws Exception {
     cmdLine = Common.parseOptions(options, args);
-    if (!cmdLine.hasOption('l')) {
-      System.out.println("no list file specify");
-      return -1;
+    if (cmdLine.hasOption('l')) {
+      
+    } else if (cmdLine.hasOption('u')) {
+      System.out.println("arguments not supported");
+      System.exit(-1);
+    } else {
+      System.out.println("no arguments");
+      System.exit(-1);
     }
     
     String listFilePath = cmdLine.getOptionValue('l');
