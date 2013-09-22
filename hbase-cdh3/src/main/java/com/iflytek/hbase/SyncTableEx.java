@@ -64,7 +64,7 @@ public class SyncTableEx implements Tool {
   private static final String ZK_QUORUM = "192.168.71.47,192.168.71.239,"
       + "192.168.71.241,192.168.71.243,192.168.71.245,192.168.71.248,192.168.71.249";
   private static final String THRIFT_SERVERS = "192.168.151.103,192.168.151.104,"
-      + "192.168.151.104,192.168.151.106,192.168.151.107,192.168.151.108,192.168.151.109,"
+      + "192.168.151.105,192.168.151.106,192.168.151.107,192.168.151.108,192.168.151.109,"
       + "192.168.151.110";
   
   // hf
@@ -187,6 +187,7 @@ public class SyncTableEx implements Tool {
     private void setup() throws Exception {
       String host = getDesThriftServer();
       int port = 9090;
+      LOG.info("try to connect server: " + host);
       transport = new TSocket(host, port);
       protocol = new TBinaryProtocol(transport);
       client = new Hbase.Client(protocol);
