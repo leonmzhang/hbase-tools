@@ -57,8 +57,8 @@ public class SyncTableEx implements Tool {
   // gz
   // private static final String ZK_QUORUM = "192.168.150.16,192.168.150.17,"
   // + "192.168.150.18,192.168.150.19,192.168.150.20";
-  // private static final String THRIFT_SERVERS = "192.168.150.22,"
-  // + "192.168.150.23,192.168.150.24,192.168.150.25";
+  private static final String THRIFT_SERVERS = "192.168.150.22,"
+      + "192.168.150.23,192.168.150.24,192.168.150.25,192.168.150.200,192.168.150.201,192.168.150.202";
   
   // bj
   private static final String ZK_QUORUM = "192.168.71.47,192.168.71.239,"
@@ -71,8 +71,9 @@ public class SyncTableEx implements Tool {
   // hf
   // private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
   // + "192.168.52.15,192.168.52.16,192.168.52.17";
-  private static final String THRIFT_SERVERS = "192.168.52.232,192.168.52.233,"
-      + "192.168.52.234,192.168.52.248";
+  // private static final String THRIFT_SERVERS =
+  // "192.168.52.232,192.168.52.233,"
+  // + "192.168.52.234,192.168.52.248";
   
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   /* the interval of sync task, 30 minute */
@@ -166,9 +167,9 @@ public class SyncTableEx implements Tool {
       this.firstSyncFlag = firstSync;
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
-      endTime = System.currentTimeMillis();
+      //endTime = System.currentTimeMillis();
       // endTime = 1379804400000L;
-      // endTime = THE_NEW_DEPLOY_TIME_GZ;
+      endTime = THE_NEW_DEPLOY_TIME_GZ;
     }
     
     public Worker(String rowRange) {
