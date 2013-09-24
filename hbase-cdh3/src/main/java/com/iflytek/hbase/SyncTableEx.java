@@ -63,15 +63,16 @@ public class SyncTableEx implements Tool {
   // bj
   private static final String ZK_QUORUM = "192.168.71.47,192.168.71.239,"
       + "192.168.71.241,192.168.71.243,192.168.71.245,192.168.71.248,192.168.71.249";
-  private static final String THRIFT_SERVERS = "192.168.151.104,192.168.151.105,"
-      + "192.168.151.106,192.168.151.107,192.168.151.108,192.168.151.109,192.168.151.110";
+  // private static final String THRIFT_SERVERS =
+  // "192.168.151.104,192.168.151.105,"
+  // +
+  // "192.168.151.106,192.168.151.107,192.168.151.108,192.168.151.109,192.168.151.110";
   
   // hf
   // private static final String ZK_QUORUM = "192.168.52.13,192.168.52.14,"
   // + "192.168.52.15,192.168.52.16,192.168.52.17";
-  // private static final String THRIFT_SERVERS =
-  // "192.168.52.232,192.168.52.233,"
-  // + "192.168.52.234,192.168.52.248";
+  private static final String THRIFT_SERVERS = "192.168.52.232,192.168.52.233,"
+      + "192.168.52.234,192.168.52.248";
   
   private static final Log LOG = LogFactory.getLog(SyncTable.class);
   /* the interval of sync task, 30 minute */
@@ -165,8 +166,8 @@ public class SyncTableEx implements Tool {
       this.firstSyncFlag = firstSync;
       firstSyncFlag = firstSync;
       startTime = THE_VERY_BEGINNING;
-      //endTime = System.currentTimeMillis();
-      endTime = 1379804400000L;
+      endTime = System.currentTimeMillis();
+      // endTime = 1379804400000L;
       // endTime = THE_NEW_DEPLOY_TIME_GZ;
     }
     
@@ -285,12 +286,12 @@ public class SyncTableEx implements Tool {
             oldTimestamp = result.getColumnLatest(PersonalUtil.OLD_FAMILY_BYTE,
                 Bytes.toBytes(oldQualify)).getTimestamp();
             value = (byte[]) entry.getValue();
-//            LOG.info((firstSyncFlag ? "first sync, " : "")
-//                + "get old personal cell, row: " + oldRowKey + ", column: "
-//                + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
-//                + ", modify time: "
-//                + Common.unixTimestampToDateStr(oldTimestamp) + ", old path: "
-//                + oldQualify);
+            // LOG.info((firstSyncFlag ? "first sync, " : "")
+            // + "get old personal cell, row: " + oldRowKey + ", column: "
+            // + PersonalUtil.OLD_FAMILY_STR + ":" + oldQualify
+            // + ", modify time: "
+            // + Common.unixTimestampToDateStr(oldTimestamp) + ", old path: "
+            // + oldQualify);
             
             PersonalCell personal = new PersonalCell();
             try {
@@ -322,7 +323,7 @@ public class SyncTableEx implements Tool {
                 client.mutateRowTs(newTableByte, newRowByte, mutations,
                     oldTimestamp, attributes);
               } else {
-                //LOG.info("do not need to sync.");
+                // LOG.info("do not need to sync.");
               }
             } catch (PersonalParseException e) {
               LOG.warn("", e);
