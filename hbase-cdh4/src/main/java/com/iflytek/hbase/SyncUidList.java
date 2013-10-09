@@ -87,7 +87,7 @@ public class SyncUidList {
         srcResult = srcTable.get(srcGet);
         if (srcResult.isEmpty()) {
           LOG.info("get row key: " + rowKey
-              + " frome src table failed, result is empty");
+              + " from src table failed, result is empty");
           continue;
         }
         srcResultMap = srcResult.getFamilyMap(Bytes.toBytes("p"));
@@ -95,8 +95,9 @@ public class SyncUidList {
           srcQualify = (byte[]) entry.getKey();
           srcTimestamp = srcResult.getColumnLatest(FAIMILY, srcQualify)
               .getTimestamp();
-          LOG.info("row key: " + rowKey + ", get qualify: " + srcQualify
-              + ", modify time: " + Common.unixTimestampToDateStr(srcTimestamp));
+          LOG.info("row key: " + rowKey + ", get qualify: "
+              + Bytes.toString(srcQualify) + ", modify time: "
+              + Common.unixTimestampToDateStr(srcTimestamp));
           
           desGet = new Get(Bytes.toBytes(rowKey));
           desGet.addColumn(Bytes.toBytes("p"), srcQualify);
@@ -111,7 +112,9 @@ public class SyncUidList {
               && (srcTimestamp - desTimestamp > 300000)) {
             desTimestamp = desResult.getColumnLatest(FAIMILY, srcQualify)
                 .getTimestamp();
-            LOG.info("modify time of des table is early than src table more than 5 min, put this cell");
+            LOG.info("modify time of des table: "
+                + Common.unixTimestampToDateStr(desTimestamp)
+                + " is early than src table more than 5 min, put this cell");
             desPut = new Put(Bytes.toBytes(rowKey));
             desPut.add(FAIMILY, srcQualify, srcTimestamp, value);
             // desTable.put(desPut);
