@@ -107,9 +107,9 @@ public class SyncUidList {
             LOG.info("des table result is empty, put this cell");
             desPut = new Put(Bytes.toBytes(rowKey));
             desPut.add(FAIMILY, srcQualify, srcTimestamp, value);
-            // desTable.put(desPut);
+            desTable.put(desPut);
           } else if (desTimestamp < srcTimestamp
-              && (srcTimestamp - desTimestamp > 300000)) {
+              && (srcTimestamp - desTimestamp > 300000000)) {
             desTimestamp = desResult.getColumnLatest(FAIMILY, srcQualify)
                 .getTimestamp();
             LOG.info("modify time of des table: "
@@ -117,7 +117,7 @@ public class SyncUidList {
                 + " is early than src table more than 5 min, put this cell");
             desPut = new Put(Bytes.toBytes(rowKey));
             desPut.add(FAIMILY, srcQualify, srcTimestamp, value);
-            // desTable.put(desPut);
+            desTable.put(desPut);
           }
         }
       }
