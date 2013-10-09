@@ -1,5 +1,8 @@
 package com.iflytek.hbase;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
@@ -53,5 +56,25 @@ public class Common {
     } else {
       return str + sb.toString();
     }
+  }
+  
+    public static String unixTimestampToDateStr(long timestamp) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    Date date = new Date(timestamp);
+    return sdf.format(date);
+  }
+  
+  public static long dateStrToUnixTimestamp(String dateStr) {
+    if(dateStr == null) {
+      return 0;
+    }
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    try {
+      Date date = sdf.parse(dateStr);
+      return date.getTime();
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return 0;
   }
 }

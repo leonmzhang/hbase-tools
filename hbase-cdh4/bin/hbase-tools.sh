@@ -16,6 +16,8 @@ fi
 CLASSPATH=${CLASSPATH}:${bin}/../hbase-tools-cdh4-0.1.0-SNAPSHOT-jar-with-dependencies.jar:${bin}/../conf
 JAVA=${JAVA_HOME}/bin/java
 
+JVM_OPTS=" -Dbase.dir=$bin/../ "
+
 COMMAND=$1
 shift
 
@@ -25,7 +27,9 @@ elif [ "${COMMAND}" = "get" ]; then
   CLASS="com.iflytek.hbase.GetTool"
 elif [ "${COMMAND}" = "put" ]; then
   CLASS="com.iflytek.hbase.PutTool"
+elif [ "${COMMAND}" = "sync_uid_list" ]; then
+  CLASS="com.iflytek.hbase.SyncUidList"
 fi
 
-${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@
+${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@ &
 
