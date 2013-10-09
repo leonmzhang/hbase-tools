@@ -108,16 +108,18 @@ public class SyncUidList {
             desPut = new Put(Bytes.toBytes(rowKey));
             desPut.add(FAIMILY, srcQualify, srcTimestamp, value);
             desTable.put(desPut);
-          } else if (desTimestamp < srcTimestamp
-              && (srcTimestamp - desTimestamp > 300000000)) {
+          } else {
             desTimestamp = desResult.getColumnLatest(FAIMILY, srcQualify)
                 .getTimestamp();
-            LOG.info("modify time of des table: "
-                + Common.unixTimestampToDateStr(desTimestamp)
-                + " is early than src table more than 5 min, put this cell");
-            desPut = new Put(Bytes.toBytes(rowKey));
-            desPut.add(FAIMILY, srcQualify, srcTimestamp, value);
-            desTable.put(desPut);
+            if (desTimestamp < srcTimestamp
+                && (srcTimestamp - desTimestamp > 300000000)) {
+              LOG.info("modify time of des table: "
+                  + Common.unixTimestampToDateStr(desTimestamp)
+                  + " is early than src table more than 5 min, put this cell");
+              desPut = new Put(Bytes.toBytes(rowKey));
+              desPut.add(FAIMILY, srcQualify, srcTimestamp, value);
+              desTable.put(desPut);
+            }
           }
         }
       }
