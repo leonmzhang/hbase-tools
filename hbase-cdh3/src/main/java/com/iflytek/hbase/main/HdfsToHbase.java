@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -24,6 +25,7 @@ import com.iflytek.hbase.thrift.generated.Hbase;
 import com.iflytek.hbase.thrift.generated.Mutation;
 import com.iflytek.hbase.thrift.generated.TCell;
 import com.iflytek.hbase.util.HbaseCell;
+import com.kenai.jaffl.annotations.Clear;
 
 public class HdfsToHbase {
   private static final Log LOG = LogFactory.getLog(HdfsToHbase.class);
@@ -72,11 +74,24 @@ public class HdfsToHbase {
     String[] strArray = pathStr.split("/");
     String fileName = strArray[strArray.length - 1];
     String[] fileNameArray = fileName.split("@");
-    cell.setTable("personal");
-    cell.setFamily("p");
-    cell.setRowKey(fileNameArray[0]);
-    cell.setQualify(fileNameArray[1]);
+    
+    if (fileNameArray.length != 2) {
+      cell.setTable("personal_other");
+      cell.setFamily("p");
+      cell.setRowKey(pathStr);
+      cell.setQualify("file");
+    } else {
+      cell.setTable("personal");
+      cell.setFamily("p");
+      cell.setRowKey(fileNameArray[0]);
+      cell.setQualify(fileNameArray[1]);
+    }
     cell.setTimestamp(pathInfo.timestamp);
+    
+    LOG.info("path: " + pathStr + ", table: " + cell.getTable() + ", row: "
+        + cell.getRowKey() + ", column: " + cell.getColumn()
+        + ", modify time: "
+        + Common.unixTimestampToDateStr(cell.getTimestamp()));
     
     byte[] buffer = new byte[(int) pathInfo.length];
     FileSystem fs = FileSystem.get(conf);
@@ -189,7 +204,9 @@ public class HdfsToHbase {
    * @param args
    */
   public static void main(String[] args) {
-    Common.globalInit();
+    //Common.globalInit();
+    String baseDir = System.getProperty("base.dir");
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     Configuration conf = new Configuration();
     // gz
     // conf.set("fs.default.name", "hdfs://namenode-gz.iflytek.com:9040");
