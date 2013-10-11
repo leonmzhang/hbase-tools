@@ -29,6 +29,16 @@ import com.kenai.jaffl.annotations.Clear;
 
 public class HdfsToHbase {
   private static final Log LOG = LogFactory.getLog(HdfsToHbase.class);
+  // gz
+  // String host = "192.168.150.24";
+  // bj
+  // String host = "192.168.151.104";
+  // hf
+  String host = "192.168.52.232";
+  int port = 9090;
+  TTransport transport = new TSocket(host, port);
+  TProtocol protocol = new TBinaryProtocol(transport);
+  Hbase.Client client = new Hbase.Client(protocol);
   
   public class PathInfo {
     public Path path;
@@ -41,6 +51,7 @@ public class HdfsToHbase {
     Path pathGws = new Path("/msp_gws");
     
     try {
+      transport.open();
       ArrayList<PathInfo> appFileList = getFileList(conf, pathApp);
       ArrayList<PathInfo> gwsFileList = getFileList(conf, pathGws);
       
@@ -58,6 +69,7 @@ public class HdfsToHbase {
       LOG.warn("", e);
     }
     
+    transport.close();
     return 0;
   }
   
@@ -131,18 +143,6 @@ public class HdfsToHbase {
   }
   
   private void hbasePut(HbaseCell cell) throws Exception {
-    // gz
-    // String host = "192.168.150.24";
-    // bj
-    // String host = "192.168.151.104";
-    // hf
-    String host = "192.168.52.232";
-    int port = 9090;
-    TTransport transport = new TSocket(host, port);
-    TProtocol protocol = new TBinaryProtocol(transport);
-    Hbase.Client client = new Hbase.Client(protocol);
-    transport.open();
-    
     List<Mutation> mutations = null;
     Mutation mutation = null;
     Map<ByteBuffer,ByteBuffer> attributes = new HashMap<ByteBuffer,ByteBuffer>();
