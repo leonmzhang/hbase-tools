@@ -117,8 +117,11 @@ public class HdfsToHbase {
   
   private void hbasePut(HbaseCell cell) throws Exception {
     // gz
-    //String host = "192.168.150.24";
-    String host = "192.168.151.104";
+    // String host = "192.168.150.24";
+    // bj
+    // String host = "192.168.151.104";
+    // hf
+    String host = "192.168.52.232";
     int port = 9090;
     TTransport transport = new TSocket(host, port);
     TProtocol protocol = new TBinaryProtocol(transport);
@@ -142,7 +145,8 @@ public class HdfsToHbase {
     try {
       List<TCell> cellList = client.get(tableName, rowKey, column, attributes);
       if (cellList.isEmpty() || cellList.get(0).timestamp < cell.getTimestamp()) {
-        client.mutateRowTs(tableName, rowKey, mutations, timestamp, attributes);
+        // client.mutateRowTs(tableName, rowKey, mutations, timestamp,
+        // attributes);
         LOG.info("write to hbase");
       }
     } catch (Exception e) {
@@ -172,7 +176,8 @@ public class HdfsToHbase {
           pathInfo.timestamp = status.getModificationTime();
           pathInfo.length = status.getLen();
           fileList.add(pathInfo);
-          LOG.info(status.getPath().toString());
+          LOG.info("path: " + status.getPath().toString() + ", modify time: "
+              + Common.unixTimestampToDateStr(pathInfo.timestamp));
         }
       }
     } while (dirPathArray.size() != 0);
@@ -186,10 +191,12 @@ public class HdfsToHbase {
   public static void main(String[] args) {
     Common.globalInit();
     Configuration conf = new Configuration();
-    //gz
-    //conf.set("fs.default.name", "hdfs://namenode-gz.iflytek.com:9040");
-    //bj
-    conf.set("fs.default.name", "hdfs://bjidss47.iflytek.com:9041");
+    // gz
+    // conf.set("fs.default.name", "hdfs://namenode-gz.iflytek.com:9040");
+    // bj
+    // conf.set("fs.default.name", "hdfs://bjidss47.iflytek.com:9041");
+    // hf
+    conf.set("fs.default.name", "hdfs://Namenode:9040");
     HdfsToHbase h2h = new HdfsToHbase();
     h2h.runTool(conf, args);
   }
