@@ -160,8 +160,8 @@ public class HdfsToHbase {
     try {
       List<TCell> cellList = client.get(tableName, rowKey, column, attributes);
       if (cellList.isEmpty() || cellList.get(0).timestamp < cell.getTimestamp()) {
-        // client.mutateRowTs(tableName, rowKey, mutations, timestamp,
-        // attributes);
+        timestamp = cell.getTimestamp();
+        client.mutateRowTs(tableName, rowKey, mutations, timestamp, attributes);
         LOG.info("write to hbase");
       }
     } catch (Exception e) {
@@ -204,7 +204,7 @@ public class HdfsToHbase {
    * @param args
    */
   public static void main(String[] args) {
-    //Common.globalInit();
+    // Common.globalInit();
     String baseDir = System.getProperty("base.dir");
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     Configuration conf = new Configuration();
