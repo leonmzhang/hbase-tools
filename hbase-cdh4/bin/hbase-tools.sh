@@ -29,6 +29,8 @@ elif [ "${COMMAND}" = "put" ]; then
   CLASS="com.iflytek.hbase.PutTool"
 elif [ "${COMMAND}" = "sync_uid_list" ]; then
   CLASS="com.iflytek.hbase.SyncUidList"
+elif [ "${COMMAND}" = "get_tmp" ]; then
+  CLASS="com.iflytek.hbase.GetTmp"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@ &
