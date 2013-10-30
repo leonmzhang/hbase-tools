@@ -12,9 +12,10 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.PropertyConfigurator;
 
 public class GetTvWord {
-  //private static final Log LOG = LogFactory.getLog(GetTvWord.class);
+  private static final Log LOG = LogFactory.getLog(GetTvWord.class);
   private static String baseDir = "";
   
   public int runTool(Configuration conf, String[] args) {
@@ -28,6 +29,7 @@ public class GetTvWord {
       byte[] value = null;
       String valueStr = null;
       while((line = br.readLine()) != null) {
+        
         Get get = new Get(Bytes.toBytes(line));
         get.addColumn(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
         result = table.get(get);
@@ -41,9 +43,9 @@ public class GetTvWord {
       table.close();
       
     } catch (IOException e) {
-      e.printStackTrace();
+      LOG.warn("", e);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.warn("", e);
     }
     
     return 0;
@@ -55,8 +57,10 @@ public class GetTvWord {
    */
   public static void main(String[] args) {
     baseDir = System.getProperty("base.dir");
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     Configuration conf = new Configuration();
+    conf.set("hbase.zookeeper.quorum", "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
     
     GetTvWord gtw = new GetTvWord();
     gtw.runTool(conf, args);
