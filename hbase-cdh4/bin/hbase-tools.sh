@@ -31,6 +31,8 @@ elif [ "${COMMAND}" = "sync_uid_list" ]; then
   CLASS="com.iflytek.hbase.SyncUidList"
 elif [ "${COMMAND}" = "get_tmp" ]; then
   CLASS="com.iflytek.hbase.GetTmp"
+elif [ "${COMMAND}" = "tv" ]; then
+  CLASS="com.iflytek.hbase.GetTvWord"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@ &
