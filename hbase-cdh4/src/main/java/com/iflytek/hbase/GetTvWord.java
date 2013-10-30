@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +25,8 @@ public class GetTvWord {
       
       FileReader fr = new FileReader(new File(baseDir + "/tv.txt"));
       BufferedReader br = new BufferedReader(fr);
+      PrintWriter pw = new PrintWriter(new File(baseDir + "/output"));
+      
       String line = null;
       Result result = null;
       byte[] value = null;
@@ -36,8 +39,11 @@ public class GetTvWord {
         value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
         valueStr = Bytes.toString(value);
         System.out.println("row: " + line + ", head: " + valueStr.substring(0, 4));
+        pw.write(line + "\t" + valueStr.substring(0, 4) + "\n");
+        pw.flush();
       }
      
+      pw.close();
       br.close();
       fr.close();
       table.close();
