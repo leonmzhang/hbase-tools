@@ -35,7 +35,7 @@ public class GetTvWord {
         result = table.get(get);
         value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
         valueStr = Bytes.toString(value);
-        System.out.println("row: " + line + ", head: " + valueStr.substring(0, 3));
+        System.out.println("row: " + line + ", head: " + valueStr.substring(0, 4));
       }
      
       br.close();
@@ -60,7 +60,9 @@ public class GetTvWord {
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     Configuration conf = new Configuration();
-    conf.set("hbase.zookeeper.quorum", "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
+    // bj
+    //conf.set("hbase.zookeeper.quorum", "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
+    conf.set("hbase.zookeeper.quorum", "mirage-pro.hbase0001.hf.voicecloud.cn");
     
     GetTvWord gtw = new GetTvWord();
     gtw.runTool(conf, args);
