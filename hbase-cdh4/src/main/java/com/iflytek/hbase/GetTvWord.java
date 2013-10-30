@@ -37,7 +37,11 @@ public class GetTvWord {
         get.addColumn(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
         result = table.get(get);
         value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
-        valueStr = Bytes.toString(value);
+        if(value != null) { 
+          valueStr = Bytes.toString(value);
+        } else {
+          valueStr = "null";
+        }
         System.out.println("row: " + line + ", head: " + valueStr.substring(0, 4));
         pw.write(line + "\t" + valueStr.substring(0, 4) + "\n");
         pw.flush();
