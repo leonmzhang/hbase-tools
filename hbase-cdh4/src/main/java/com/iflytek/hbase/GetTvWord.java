@@ -34,16 +34,19 @@ public class GetTvWord {
       while((line = br.readLine()) != null) {
         
         Get get = new Get(Bytes.toBytes(line));
-        get.addColumn(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
+        //get.addColumn(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
         result = table.get(get);
-        value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
+        //value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("_v2_tvword_nlp.bin"));
+        value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("tvword.txt"));
         if(value != null) { 
-          valueStr = Bytes.toString(value);
+          //valueStr = Bytes.toString(value);
+          valueStr = "" + value.length;
         } else {
           valueStr = "null";
         }
-        System.out.println("row: " + line + ", head: " + valueStr.substring(0, 4));
-        pw.write(line + "\t" + valueStr.substring(0, 4) + "\n");
+        //System.out.println("row: " + line + ", head: " + valueStr.substring(0, 4));
+        //pw.write(line + "\t" + valueStr.substring(0, 4) + "\n");
+        pw.write(line + "\t" + valueStr + "\n");
         pw.flush();
       }
      
