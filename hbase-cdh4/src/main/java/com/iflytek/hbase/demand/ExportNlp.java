@@ -17,6 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 public class ExportNlp {
   private static final Log LOG = LogFactory.getLog(ExportNlp.class);
   private static String baseDir = "";
+  private static File outputDir = null;
   
   public int runTool(Configuration conf, String[] args) {
     try {
@@ -48,10 +49,13 @@ public class ExportNlp {
           continue;
         }
         rowKey = Bytes.toString(result.getRow());
-        fos = new FileOutputStream(new File(rowKey + "@contact.txt"));
+        String[] strArray = rowKey.split("@");
+        fos = new FileOutputStream(new File(outputDir.getAbsolutePath() + "/"
+            + strArray[0] + "@contact.txt"));
         fos.write(txtValue);
         fos.close();
-        fos = new FileOutputStream(new File(rowKey + "@contact_nlp.bin"));
+        fos = new FileOutputStream(new File(outputDir.getAbsolutePath() + "/"
+            + strArray[0] + "@contact_nlp.bin"));
         fos.write(nlpBinValue);
         fos.close();
         count++;
@@ -69,8 +73,8 @@ public class ExportNlp {
   public static void main(String[] args) {
     baseDir = System.getProperty("base.dir");
     
-    File outputDir = new File(baseDir + "/nlp_export");
-    if(!outputDir.exists()) {
+    outputDir = new File(baseDir + "/nlp_export");
+    if (!outputDir.exists()) {
       outputDir.mkdirs();
     }
     
@@ -78,10 +82,12 @@ public class ExportNlp {
     
     Configuration conf = new Configuration();
     // bj
-     conf.set("hbase.zookeeper.quorum",
-     "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
+    conf.set(
+        "hbase.zookeeper.quorum",
+        "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
     // hf
-    // conf.set("hbase.zookeeper.quorum", "mirage-pro.hbase0001.hf.voicecloud.cn");
+    // conf.set("hbase.zookeeper.quorum",
+    // "mirage-pro.hbase0001.hf.voicecloud.cn");
     
     ExportNlp en = new ExportNlp();
     en.runTool(conf, args);
