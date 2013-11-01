@@ -34,7 +34,7 @@ elif [ "${COMMAND}" = "get_tmp" ]; then
 elif [ "${COMMAND}" = "tv" ]; then
   CLASS="com.iflytek.hbase.GetTvWord"
 elif [ "${COMMAND}" = "nlp" ]; then
-  CLASS="com.iflytek.hbase.ExportNlp"
+  CLASS="com.iflytek.hbase.demand.ExportNlp"
 fi
 
 ${JAVA} -classpath ${CLASSPATH} ${JVM_OPTS} ${CLASS} $@ &
