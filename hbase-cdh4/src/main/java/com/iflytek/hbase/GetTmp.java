@@ -30,7 +30,7 @@ public class GetTmp {
       byte[] value = result.getValue(Bytes.toBytes("p"), Bytes.toBytes("contact.txt"));
       FileOutputStream fos = new FileOutputStream(new File(uid + "@contact.txt"));
       fos.write(value);
-      fos.close();
+      fos.close();  
     }
     
     table.close();
