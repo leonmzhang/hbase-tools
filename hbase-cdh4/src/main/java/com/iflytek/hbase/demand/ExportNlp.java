@@ -50,11 +50,11 @@ public class ExportNlp {
         }
         rowKey = Bytes.toString(result.getRow());
         String[] strArray = rowKey.split("@");
-        File txtFile = new File(outputDir.getAbsolutePath() + "/"
-            + strArray[0] + "@contact.txt");
-        File binFile = new File(outputDir.getAbsolutePath() + "/"
-            + strArray[0] + "@contact_nlp.bin");
-        if(txtFile.exists() || binFile.exists()) {
+        File txtFile = new File(outputDir.getAbsolutePath() + "/" + strArray[0]
+            + "@contact.txt");
+        File binFile = new File(outputDir.getAbsolutePath() + "/" + strArray[0]
+            + "@contact_nlp.bin");
+        if (txtFile.exists() || binFile.exists()) {
           continue;
         }
         fos = new FileOutputStream(txtFile);
@@ -87,12 +87,11 @@ public class ExportNlp {
     
     Configuration conf = new Configuration();
     // bj
-    conf.set(
-        "hbase.zookeeper.quorum",
-        "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
+    // conf.set(
+    // "hbase.zookeeper.quorum",
+    // "mirage-pro.hbase0001.bj.voicecloud.cn,mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn");
     // hf
-    // conf.set("hbase.zookeeper.quorum",
-    // "mirage-pro.hbase0001.hf.voicecloud.cn");
+    conf.set("hbase.zookeeper.quorum", "mirage-pro.hbase0001.hf.voicecloud.cn");
     
     ExportNlp en = new ExportNlp();
     en.runTool(conf, args);
