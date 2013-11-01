@@ -50,12 +50,17 @@ public class ExportNlp {
         }
         rowKey = Bytes.toString(result.getRow());
         String[] strArray = rowKey.split("@");
-        fos = new FileOutputStream(new File(outputDir.getAbsolutePath() + "/"
-            + strArray[0] + "@contact.txt"));
+        File txtFile = new File(outputDir.getAbsolutePath() + "/"
+            + strArray[0] + "@contact.txt");
+        File binFile = new File(outputDir.getAbsolutePath() + "/"
+            + strArray[0] + "@contact_nlp.bin");
+        if(txtFile.exists() || binFile.exists()) {
+          continue;
+        }
+        fos = new FileOutputStream(txtFile);
         fos.write(txtValue);
         fos.close();
-        fos = new FileOutputStream(new File(outputDir.getAbsolutePath() + "/"
-            + strArray[0] + "@contact_nlp.bin"));
+        fos = new FileOutputStream(binFile);
         fos.write(nlpBinValue);
         fos.close();
         count++;
