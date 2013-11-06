@@ -34,7 +34,8 @@ public class ExportNlp {
       Map<?,?> familyMap = null;
       
       byte[] txtValue = null;
-      byte[] nlpBinValue = null;
+      //byte[] nlpBinValue = null;
+      byte[] v2NlpBinValue = null;
       
       FileOutputStream fos = null;
       
@@ -43,17 +44,19 @@ public class ExportNlp {
       while ((result = scanner.next()) != null && count <= 50000) {
         txtValue = result.getValue(Bytes.toBytes("p"),
             Bytes.toBytes("contact.txt"));
-        nlpBinValue = result.getValue(Bytes.toBytes("p"),
-            Bytes.toBytes("contact_nlp.bin"));
-        if (txtValue == null || nlpBinValue == null) {
+        // nlpBinValue = result.getValue(Bytes.toBytes("p"),
+        // Bytes.toBytes("contact_nlp.bin"));
+        v2NlpBinValue = result.getValue(Bytes.toBytes("p"),
+            Bytes.toBytes("_v2_contact_nlp.bin"));
+        if (txtValue == null || v2NlpBinValue == null) {
           continue;
         }
         rowKey = Bytes.toString(result.getRow());
         String[] strArray = rowKey.split("@");
-        File txtFile = new File(outputDir.getAbsolutePath() + "/" + strArray[0]
+        File txtFile = new File(outputDir.getAbsolutePath() + "/txt/" + strArray[0]
             + "@contact.txt");
-        File binFile = new File(outputDir.getAbsolutePath() + "/" + strArray[0]
-            + "@contact_nlp.bin");
+        File binFile = new File(outputDir.getAbsolutePath() + "/bin/" + strArray[0]
+            + "@_v2_contact_nlp.bin");
         if (txtFile.exists() || binFile.exists()) {
           continue;
         }
@@ -61,7 +64,7 @@ public class ExportNlp {
         fos.write(txtValue);
         fos.close();
         fos = new FileOutputStream(binFile);
-        fos.write(nlpBinValue);
+        fos.write(v2NlpBinValue);
         fos.close();
         count++;
       }
@@ -81,6 +84,10 @@ public class ExportNlp {
     outputDir = new File(baseDir + "/nlp_export");
     if (!outputDir.exists()) {
       outputDir.mkdirs();
+      File txtFileDir = new File(outputDir.getAbsolutePath() + "/txt");
+      txtFileDir.mkdirs();
+      File binFileDir = new File(outputDir.getAbsolutePath() + "/bin");
+      binFileDir.mkdirs();
     }
     
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
