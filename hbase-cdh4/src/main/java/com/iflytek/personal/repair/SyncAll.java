@@ -25,9 +25,10 @@ public class SyncAll {
   
   private static final String HBASE_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
   
-  private static final String BJ_ZK_QUORUM = "";
-  private static final String HF_ZK_QUORUM = "";
-  private static final String GZ_ZK_QUORUM = "";
+  private static final String BJ_ZK_QUORUM = "mirage-pro.hbase0001.bj.voicecloud.cn,"
+      + "mirage-pro.hbase0002.bj.voicecloud.cn,mirage-pro.hbase0003.bj.voicecloud.cn";
+  private static final String HF_ZK_QUORUM = "mirage-pro.hbase0001.hf.voicecloud.cn";
+  private static final String GZ_ZK_QUORUM = "mirage-pro.hbase0001.gz.voicecloud.cn";
   
   private static final String TABLE_NAME = "personal";
   private static final String FAMILY = "p";
