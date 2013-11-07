@@ -34,6 +34,8 @@ public class SyncAll {
   
   private static int count = 0;
   
+  private static String startRow = "0";
+  
   static {
     bjConf.set(HBASE_ZOOKEEPER_QUORUM, BJ_ZK_QUORUM);
     hfConf.set(HBASE_ZOOKEEPER_QUORUM, HF_ZK_QUORUM);
@@ -136,6 +138,10 @@ public class SyncAll {
    */
   public static void main(String[] args) {
     String baseDir = System.getProperty("base.dir");
+    
+    if(args.length != 0) {
+      startRow = args[0];
+    }
     
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
