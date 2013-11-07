@@ -33,7 +33,7 @@ public class SyncAll {
   private static final String TABLE_NAME = "personal";
   private static final String FAMILY = "p";
   
-  private static final AtomicInteger count = new AtomicInteger(0);
+  private static int count = 0;
   
   static {
     bjConf.set(HBASE_ZOOKEEPER_QUORUM, BJ_ZK_QUORUM);
@@ -79,13 +79,19 @@ public class SyncAll {
       }
       familyMap = result.getFamilyMap(Bytes.toBytes(FAMILY));
       row = result.getRow();
-      for(Map.Entry<?,?> entry : familyMap.entrySet()) {
-        qualifier = (byte[])entry.getKey();
-        value = (byte[])entry.getValue();
+      for (Map.Entry<?,?> entry : familyMap.entrySet()) {
+        qualifier = (byte[]) entry.getKey();
+        value = (byte[]) entry.getValue();
         timestamp = result.getColumnLatest(family, qualifier).getTimestamp();
+        LOG.info("get cell, row: " + Bytes.toString(row) + ", column: f:"
+            + Bytes.toString(qualifier) + ", modify time: " + timestamp
+            + ", size: " + value.length + ".");
         checkData(hfTable, row, family, qualifier, timestamp, value);
       }
-      
+      count++;
+      if((count % 1000) == 0) {
+        LOG.info("already scan " + count + " row.");
+      } 
     } while (result != null);
     
     cleanup();
@@ -126,7 +132,7 @@ public class SyncAll {
    * @param args
    */
   public static void main(String[] args) {
-    String baseDir = System.getProperty("base.dir"); 
+    String baseDir = System.getProperty("base.dir");
     
     PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
