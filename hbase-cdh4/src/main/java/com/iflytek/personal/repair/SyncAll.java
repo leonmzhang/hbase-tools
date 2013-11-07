@@ -123,7 +123,7 @@ public class SyncAll {
     Result result = null;
     try {
       result = table.get(get);
-      if (result == null) {
+      if (result.isEmpty()) {
         Put put = new Put(row);
         put.add(family, qualifier, timestamp, value);
         // table.put(put);
