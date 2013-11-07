@@ -34,7 +34,7 @@ public class SyncAll {
   
   private static int count = 0;
   
-  private static String startRow = "0";
+  private static String startRow = null;;
   
   static {
     bjConf.set(HBASE_ZOOKEEPER_QUORUM, BJ_ZK_QUORUM);
@@ -51,6 +51,9 @@ public class SyncAll {
     
     Result result = null;
     Scan scan = new Scan();
+    if(startRow != null) {
+      scan.setStartRow(Bytes.toBytes(startRow));
+    }
     
     ResultScanner scanner = bjTable.getScanner(scan);
     String lastScanRow = null;
