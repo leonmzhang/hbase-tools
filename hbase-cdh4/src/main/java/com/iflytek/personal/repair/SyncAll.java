@@ -2,7 +2,6 @@ package com.iflytek.personal.repair;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,12 +85,13 @@ public class SyncAll {
         LOG.info("get cell, row: " + Bytes.toString(row) + ", column: f:"
             + Bytes.toString(qualifier) + ", modify time: " + timestamp
             + ", size: " + value.length + ".");
-        checkData(hfTable, row, family, qualifier, timestamp, value);
+        checkData("hf", hfTable, row, family, qualifier, timestamp, value);
+        checkData("gz", gzTable, row, family, qualifier, timestamp, value);
       }
       count++;
-      if((count % 1000) == 0) {
+      if ((count % 1000) == 0) {
         LOG.info("already scan " + count + " row.");
-      } 
+      }
     } while (result != null);
     
     cleanup();
@@ -110,8 +110,8 @@ public class SyncAll {
     gzTable.close();
   }
   
-  private void checkData(HTable table, byte[] row, byte[] family,
-      byte[] qualifier, long timestamp, byte[] value) {
+  private void checkData(String dataCenter, HTable table, byte[] row,
+      byte[] family, byte[] qualifier, long timestamp, byte[] value) {
     Get get = new Get(row);
     get.addColumn(family, qualifier);
     
@@ -122,6 +122,9 @@ public class SyncAll {
         Put put = new Put(row);
         put.add(family, qualifier, timestamp, value);
         // table.put(put);
+        LOG.info("put cell to " + dataCenter + ", row: " + Bytes.toString(row)
+            + ", column: f:" + Bytes.toString(qualifier) + ", last modify: "
+            + timestamp + ", length: " + value.length);
       }
     } catch (IOException e) {
       LOG.warn("", e);
