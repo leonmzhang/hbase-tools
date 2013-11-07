@@ -125,7 +125,9 @@ public class SyncAll {
    * @param args
    */
   public static void main(String[] args) {
-    PropertyConfigurator.configure("");
+    String baseDir = System.getProperty("base.dir"); 
+    
+    PropertyConfigurator.configure(baseDir + "/conf/log4j.properties");
     
     SyncAll sa = new SyncAll();
     try {
