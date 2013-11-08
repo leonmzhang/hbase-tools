@@ -126,7 +126,7 @@ public class SyncAll {
       if (result.isEmpty()) {
         Put put = new Put(row);
         put.add(family, qualifier, timestamp, value);
-        // table.put(put);
+        table.put(put);
         LOG.info("put cell to " + dataCenter + ", row: " + Bytes.toString(row)
             + ", column: f:" + Bytes.toString(qualifier) + ", last modify: "
             + timestamp + ", length: " + value.length);
