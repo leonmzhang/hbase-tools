@@ -35,6 +35,8 @@ elif [ "${COMMAND}" = "tv" ]; then
   CLASS="com.iflytek.hbase.GetTvWord"
 elif [ "${COMMAND}" = "nlp" ]; then
   CLASS="com.iflytek.hbase.demand.ExportNlp"
+elif [ "${COMMAND}" = "copy" ]; then
+  CLASS="com.iflytek.hbase.demand.ExportContact"
 elif [ "${COMMAND}" = "repair" ]; then
   CLASS="com.iflytek.personal.repair.SyncAll"
 fi
