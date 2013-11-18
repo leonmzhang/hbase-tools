@@ -60,7 +60,6 @@ public class ExportContact {
           pw.write(rowKey + "\n");
           pw.flush();
           count++;
-          totalCount++;
           System.out.println("already copy data: " + (++totalCount));
         }
       }
@@ -77,7 +76,7 @@ public class ExportContact {
     
     for (int i = 0; i < 10; i++) {
       if (i == 0) {
-        startKey += i;
+        startKey = "10";
       } else {
         startKey = "a" + i;
       }
